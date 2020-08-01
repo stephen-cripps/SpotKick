@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace SpotKick
 {
-    public  class SongkickResults
+    public  class Gigs
     {
         public ResultsPage ResultsPage { get; set; }
     }
@@ -34,4 +34,37 @@ namespace SpotKick
         public Event Event { get; set; }
     }
 
+
+    public class Reason
+    {
+        public TrackedArtist[] TrackedArtist { get; set; }
+
+        public string Attendance { get; set; }
+    }
+
+    public class TrackedArtist
+    {
+        public string DisplayName { get; set; }
+    }
+
+    public class Event
+    {
+        public Status Status { get; set; }
+
+        public Start Start { get; set; }
+
+        public Location Location { get; set; }
+    }
+
+    public class Start
+    {
+        public DateTimeOffset Date { get; set; }
+    }
+
+    public class Location
+    {
+        public string City { get; set; }
+    }
+
+    public enum Status { Ok, Postponed };
 }

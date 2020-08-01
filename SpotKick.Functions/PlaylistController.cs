@@ -1,26 +1,46 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpotKick.ResponseModels.SpotifyResults;
 
-namespace SpotKick
+namespace SpotKick.Functions
 {
-    class POC
+    public static class PlaylistController
     {
-        static Settings settings;
         static HttpClient client;
         static string spotifyToken;
 
-        static async Task Main(string[] args)
+        [FunctionName("PlaylistCreatorTimer")]
+        public static async Task PlaylistCreatorTimer([TimerTrigger("0 0 0 * * 0")]TimerInfo myTimer, ILogger log)
         {
-            settings = GetSettings();
+            await Create();
+        }
+
+        [FunctionName("PlaylistCreatorHTTP")]
+        public static async Task<IActionResult> PlaylistCreatorHTTP(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
+            HttpRequest req, ILogger log)
+        {
+            await Create();
+            return new StatusCodeResult(201); //TODO: Error Handling
+        }
+
+
+        static async Task Create()
+        {
             client = new HttpClient();
 
             var gigs = await FindGigs();
@@ -59,30 +79,18 @@ namespace SpotKick
             await UpdatePlaylist(playlistId, trackIds);
         }
 
-        static Settings GetSettings()
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("local.settings.json");
-
-            IConfigurationRoot configuration = builder.Build();
-            var settings = new Settings();
-            configuration.GetSection("Values").Bind(settings);
-
-            return settings;
-        }
-
         static async Task<List<Gig>> FindGigs()
         {
             var entries = new List<CalendarEntry>();
             ResultsPage results;
             var page = 1;
+            var username = Environment.GetEnvironmentVariable("songkickUsername");
+            var apiKey = Environment.GetEnvironmentVariable("songkickApiKey");
             do
             {
-                //TODO: Add Error Handling 
-                var uri = $"https://api.songkick.com/api/3.0/users/{settings.SongkickUsername}/calendar.json?reason=tracked_artist&apikey={settings.SongkickApiKey}&page={page}&attendance=all";
+                var uri = $"https://api.songkick.com/api/3.0/users/{username}/calendar.json?reason=tracked_artist&apikey={apiKey}&page={page}&attendance=all";
                 var response = await client.GetAsync(uri);
-                results = JsonConvert.DeserializeObject<SongkickResults>(await response.Content.ReadAsStringAsync()).ResultsPage;
+                results = JsonConvert.DeserializeObject<Gigs>(await response.Content.ReadAsStringAsync()).ResultsPage;
                 entries.AddRange(results.Results.CalendarEntry);
                 page++;
             } while (results.Page * results.PerPage < results.TotalEntries);
@@ -100,10 +108,15 @@ namespace SpotKick
 
         static async Task GetSpotifyAccessToken()
         {
+            //TODO: Move this stuff to key vault
+            var token = Environment.GetEnvironmentVariable("spotifyRefreshToken");
+            var clientId = Environment.GetEnvironmentVariable("spotifyClientId");
+            var clientSecret = Environment.GetEnvironmentVariable("spotifyClientSecret");
+
             var body = new Dictionary<string, string>()
             {
                 {"grant_type","refresh_token" },
-                { "refresh_token" ,settings.SpotifyRefreshToken}
+                { "refresh_token" ,token}
             };
 
             var request = new HttpRequestMessage()
@@ -113,26 +126,24 @@ namespace SpotKick
                 Content = new FormUrlEncodedContent(body)
             };
 
-            var authString = Base64Encode(settings.SpotifyClientId + ":" + settings.SpotifyClientSecret);
+            var authString = Base64Encode(clientId + ":" + clientSecret);
             request.Headers.Authorization = new AuthenticationHeaderValue("Basic", authString);
 
-            //TODO: Add Error Handling 
             var response = await client.SendAsync(request);
 
-            spotifyToken = JsonConvert.DeserializeObject<SpotifyAuth>(await response.Content.ReadAsStringAsync()).AccessToken;
+            spotifyToken = JsonConvert.DeserializeObject<Auth>(await response.Content.ReadAsStringAsync()).AccessToken;
         }
 
         static string Base64Encode(string plainText)
         {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            return System.Convert.ToBase64String(plainTextBytes);
+            return Convert.ToBase64String(plainTextBytes);
         }
 
         static async Task<string> FindArtistId(string name)
         {
             var uri = Uri.EscapeUriString($"https://api.spotify.com/v1/search?q={name}&type=artist");
 
-            //TODO: Add Error Handling 
             var response = await client.GetAsync(uri);
 
             return JsonConvert.DeserializeObject<ArtistSearch>(await response.Content.ReadAsStringAsync())
@@ -146,7 +157,6 @@ namespace SpotKick
         {
             var uri = $"https://api.spotify.com/v1/artists/{id}/top-tracks?country=from_token";
 
-            //TODO: Add Error Handling 
             var response = await client.GetAsync(uri);
 
             return JsonConvert.DeserializeObject<TopTracks>(await response.Content.ReadAsStringAsync()).Tracks
@@ -157,7 +167,6 @@ namespace SpotKick
         {
             var uri = $"https://api.spotify.com/v1/me/playlists";
 
-            //TODO: Add Error Handling 
             var response = await client.GetAsync(uri);
 
             var playlists = JsonConvert.DeserializeObject<UsersPlaylists>(await response.Content.ReadAsStringAsync())
@@ -182,7 +191,6 @@ namespace SpotKick
 
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            //TODO: Add Error Handling 
             var response = await client.SendAsync(request);
             return JsonConvert.DeserializeObject<CreatePlaylist>(await response.Content.ReadAsStringAsync()).Id;
         }
@@ -201,7 +209,6 @@ namespace SpotKick
                 };
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                //TODO: Add Error Handling 
                 await client.SendAsync(request);
             }
         }

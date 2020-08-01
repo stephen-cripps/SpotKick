@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace SpotKick
 {
-    public class SpotifyAuth
+    public class Auth
     {
         [JsonProperty("access_token")]
         public string AccessToken { get; set; }
