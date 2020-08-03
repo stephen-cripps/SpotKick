@@ -22,10 +22,12 @@ namespace SpotKick.Functions
     {
         static HttpClient client;
         static string spotifyToken;
+        static ILogger logger;
 
         [FunctionName("PlaylistCreatorTimer")]
         public static async Task PlaylistCreatorTimer([TimerTrigger("0 0 0 * * 0")]TimerInfo myTimer, ILogger log)
         {
+            logger = log;
             await Create();
         }
 
@@ -34,6 +36,7 @@ namespace SpotKick.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
             HttpRequest req, ILogger log)
         {
+            logger = log;
             await Create();
             return new StatusCodeResult(201); //TODO: Error Handling
         }
@@ -42,28 +45,37 @@ namespace SpotKick.Functions
         static async Task Create()
         {
             client = new HttpClient();
-
             var gigs = await FindGigs();
+            logger.LogTrace("Found Gigs");
 
             await GetSpotifyAccessToken();
+            logger.LogTrace("Got Access Token");
 
             client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", spotifyToken);
 
             var playlistId = await GetPlaylistId();
-            var trackIds = new List<string>();
+            logger.LogTrace("Playlist Id:" + playlistId);
 
-            foreach (var artist in gigs.SelectMany(gig => gig.TrackedArtists))
+            var trackIds = new List<string>();
+            var artistsFound = 0;
+            var trackedArtists = gigs.SelectMany(gig => gig.TrackedArtists).ToList();
+
+            foreach (var artist in trackedArtists)
             {
                 var artistId = "";
-                //display any not-found artists to user
+                //Need to handle not found artists
                 try
                 {
                     artistId = await FindArtistId(artist);
+                    if (artistId != null)
+                        artistsFound++;
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    logger.LogError("Error finding ID for "+artist);
+                    logger.LogError(e.Message);
+                    logger.LogError(e.StackTrace);
                 }
 
                 try
@@ -72,11 +84,17 @@ namespace SpotKick.Functions
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    logger.LogError("Error finding tracks for " + artist);
+                    logger.LogError(e.Message);
+                    logger.LogError(e.StackTrace);
                 }
             }
 
+            logger.LogTrace($"Found {artistsFound} of {trackedArtists.Count} artists");
+
             await UpdatePlaylist(playlistId, trackIds);
+
+            logger.LogTrace("UpdatedPlaylist");
         }
 
         static async Task<List<Gig>> FindGigs()
@@ -165,14 +183,14 @@ namespace SpotKick.Functions
 
         static async Task<string> GetPlaylistId()
         {
-            var uri = $"https://api.spotify.com/v1/me/playlists";
+            var uri = "https://api.spotify.com/v1/me/playlists";
 
             var response = await client.GetAsync(uri);
 
             var playlists = JsonConvert.DeserializeObject<UsersPlaylists>(await response.Content.ReadAsStringAsync())
                 .Playlists;
 
-            const string name = "SpotKick - Test";
+            const string name = "SpotKick - Test2";
 
             return playlists.Any(p => p.Name == name) ? playlists.SingleOrDefault(p => p.Name == name)?.Id : await CreatePlaylist(name);
         }
