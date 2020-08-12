@@ -25,7 +25,7 @@ namespace SpotKick.Functions
         static ILogger logger;
 
         [FunctionName("PlaylistCreatorTimer")]
-        public static async Task PlaylistCreatorTimer([TimerTrigger("0 0 0 * * 0")]TimerInfo myTimer, ILogger log)
+        public static async Task PlaylistCreatorTimer([TimerTrigger("0 0 0 * * *")]TimerInfo myTimer, ILogger log) //Running daily temporarily to work out what's going wrong
         {
             logger = log;
             await Create();
@@ -59,7 +59,11 @@ namespace SpotKick.Functions
 
             var trackIds = new List<string>();
             var artistsFound = 0;
-            var trackedArtists = gigs.SelectMany(gig => gig.TrackedArtists).ToList();
+            var trackedArtists = gigs
+                .Where(gig => gig.Date < DateTimeOffset.Now.AddMonths(1))
+                .Where(gig => gig.Status != Status.Postponed)
+                .SelectMany(gig => gig.TrackedArtists)
+                .ToList();
 
             foreach (var artist in trackedArtists)
             {
@@ -73,7 +77,7 @@ namespace SpotKick.Functions
                 }
                 catch (Exception e)
                 {
-                    logger.LogError("Error finding ID for "+artist);
+                    logger.LogError("Error finding ID for " + artist);
                     logger.LogError(e.Message);
                     logger.LogError(e.StackTrace);
                 }
@@ -108,6 +112,7 @@ namespace SpotKick.Functions
             {
                 var uri = $"https://api.songkick.com/api/3.0/users/{username}/calendar.json?reason=tracked_artist&apikey={apiKey}&page={page}&attendance=all";
                 var response = await client.GetAsync(uri);
+                var test = await response.Content.ReadAsStringAsync();
                 results = JsonConvert.DeserializeObject<Gigs>(await response.Content.ReadAsStringAsync()).ResultsPage;
                 entries.AddRange(results.Results.CalendarEntry);
                 page++;
@@ -164,11 +169,23 @@ namespace SpotKick.Functions
 
             var response = await client.GetAsync(uri);
 
-            return JsonConvert.DeserializeObject<ArtistSearch>(await response.Content.ReadAsStringAsync())
-                .Artists
-                .Items
-                .FirstOrDefault()?
-                .Id;
+            var content = await response.Content.ReadAsStringAsync();
+
+
+            //Why is content null sometimes
+            try
+            {
+                return JsonConvert.DeserializeObject<ArtistSearch>(content)
+                    .Artists
+                    .Items
+                    .FirstOrDefault()?
+                    .Id;
+            }
+            catch
+            {
+                logger.LogError("Failed FindArtistId Content: " + content);
+                throw;
+            }
         }
 
         static async Task<IEnumerable<string>> GetTopTrackIds(string id)
@@ -190,7 +207,7 @@ namespace SpotKick.Functions
             var playlists = JsonConvert.DeserializeObject<UsersPlaylists>(await response.Content.ReadAsStringAsync())
                 .Playlists;
 
-            const string name = "SpotKick - Test2";
+            const string name = "SpotKick - All Coming Month";
 
             return playlists.Any(p => p.Name == name) ? playlists.SingleOrDefault(p => p.Name == name)?.Id : await CreatePlaylist(name);
         }
@@ -222,8 +239,8 @@ namespace SpotKick.Functions
                 var request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri($"https://api.spotify.com/v1/playlists/{id}/tracks"),
-                    Method = HttpMethod.Post,
-                    Content = new StringContent(JsonConvert.SerializeObject(items))
+                    Method = HttpMethod.Put,
+                    Content = new StringContent(JsonConvert.SerializeObject(new { uris = items }))
                 };
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
