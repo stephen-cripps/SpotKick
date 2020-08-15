@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection.Metadata;
-using System.Text;
-using Newtonsoft.Json;
 
-namespace SpotKick
+namespace SpotKick.Application.ResponseModels.SongkickResults
 {
     public  class Gigs
     {

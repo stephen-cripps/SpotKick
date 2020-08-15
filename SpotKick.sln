@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29926.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotKick.Functions", "SpotKick.Functions\SpotKick.Functions.csproj", "{8FEFFB49-6903-4BBD-B146-8B47F9675B4C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotKick.Functions", "SpotKick.Functions\SpotKick.Functions.csproj", "{8FEFFB49-6903-4BBD-B146-8B47F9675B4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotKick.Console", "SpotKick.Console\SpotKick.Console.csproj", "{9A635773-98B4-48A2-86CA-947E831D77DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotKick.Application", "SpotKick.Application\SpotKick.Application.csproj", "{ADADF6F7-7D79-4C84-9393-290C4116FBAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{8FEFFB49-6903-4BBD-B146-8B47F9675B4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FEFFB49-6903-4BBD-B146-8B47F9675B4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FEFFB49-6903-4BBD-B146-8B47F9675B4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A635773-98B4-48A2-86CA-947E831D77DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A635773-98B4-48A2-86CA-947E831D77DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A635773-98B4-48A2-86CA-947E831D77DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A635773-98B4-48A2-86CA-947E831D77DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADADF6F7-7D79-4C84-9393-290C4116FBAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADADF6F7-7D79-4C84-9393-290C4116FBAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADADF6F7-7D79-4C84-9393-290C4116FBAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADADF6F7-7D79-4C84-9393-290C4116FBAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

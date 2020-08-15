@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SpotKick.ResponseModels.SpotifyResults
+﻿namespace SpotKick.Application.ResponseModels.SpotifyResults
 {
     public class ArtistSearch
     {

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace SpotKick.ResponseModels.SpotifyResults
+namespace SpotKick.Application.ResponseModels.SpotifyResults
 {
     public class UsersPlaylists
     {
