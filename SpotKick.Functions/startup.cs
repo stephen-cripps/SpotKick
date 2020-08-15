@@ -4,6 +4,7 @@ using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using SpotKick.Functions;
 using Microsoft.Extensions.DependencyInjection;
 using SpotKick.Application;
+using SpotKick.Application.Services;
 
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -28,7 +29,12 @@ namespace SpotKick.Functions
                 client.BaseAddress = new Uri("https://api.github.com/");
             });
 
-            builder.Services.AddTransient<IPlaylistBuilder, PlaylistBuilder>();
+            builder.Services.AddTransient<IPlaylistBuilder, PlaylistBuilder>()
+                .AddTransient<ISpotifyService, SpotifyService>()
+                .AddTransient<ISongkickService, SongkickService>(x => new SongkickService(
+                    Environment.GetEnvironmentVariable("songkickUsername"),
+                    Environment.GetEnvironmentVariable("songkickApiKey")
+                ));
         }
     }
 }
