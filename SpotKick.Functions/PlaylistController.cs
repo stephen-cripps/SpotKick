@@ -25,7 +25,7 @@ namespace SpotKick.Functions
         static ILogger logger;
 
         [FunctionName("PlaylistCreatorTimer")]
-        public static async Task PlaylistCreatorTimer([TimerTrigger("0 0 0 * * *")]TimerInfo myTimer, ILogger log) //Running daily temporarily to work out what's going wrong
+        public static async Task PlaylistCreatorTimer([TimerTrigger("0 0 0 0 * *")]TimerInfo myTimer, ILogger log) //Running daily temporarily to work out what's going wrong
         {
             logger = log;
             await Create();
