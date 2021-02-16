@@ -5,10 +5,11 @@ SpotKick looks at upcoming gigs for the artists you’re tracking in Songkick. A
 - Gigs you are going to
 
 ## Running Locally
+- This is currently just a proof of concept which can be run as a console or functions app 
 - Clone the repository to your PC
 - Create a local.settings.json file in the directory using the template local.settings.template.json
   - Follow the steps listed here to get your Spotify Refresh token: https://developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-
-- Run the .exe
+- Run program
   
 ## Upcoming Features
   - Web App
