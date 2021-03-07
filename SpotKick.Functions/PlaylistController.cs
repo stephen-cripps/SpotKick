@@ -30,8 +30,7 @@ namespace SpotKick.Functions
 
         [FunctionName("PlaylistCreatorTimer")]
         public async Task
-            PlaylistCreatorTimer([TimerTrigger("0 0 0 * * *")] TimerInfo myTimer,
-                ILogger log)
+            PlaylistCreatorTimer([TimerTrigger("0 0 0 * * *")] TimerInfo myTimer,ILogger log)
         {
             await builder.Create();
         }
