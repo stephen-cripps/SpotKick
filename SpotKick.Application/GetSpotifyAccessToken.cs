@@ -32,8 +32,6 @@ namespace SpotKick.Application
 
             var response = await client.SendAsync(request);
 
-            var test = await response.Content.ReadAsStringAsync();
-
             return JsonConvert.DeserializeObject<Auth>(await response.Content.ReadAsStringAsync()).AccessToken;
         }
 
