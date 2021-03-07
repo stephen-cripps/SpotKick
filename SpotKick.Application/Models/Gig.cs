@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using SpotKick.Application.ResponseModels.SongkickResults;
 
-namespace SpotKick
+namespace SpotKick.Application.Models
 {
     public class Gig
     {
