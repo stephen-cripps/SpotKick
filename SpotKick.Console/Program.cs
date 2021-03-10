@@ -20,10 +20,6 @@ namespace SpotKick.ConsoleApp
 
             //Run every day at 17:00. Change this to be set up by GUI once that's built
             scheduler.ScheduleOn(1,17);
-
-            //Leave this in just for testing
-            Console.WriteLine("SpotKick Run");
-            Console.ReadLine(); 
         }
     }
 }
