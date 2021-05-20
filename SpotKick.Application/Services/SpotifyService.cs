@@ -16,10 +16,18 @@ namespace SpotKick.Application.Services
         readonly HttpClient spotifyClient;
         readonly ILogger<SpotifyService> logger;
 
-        public SpotifyService(ILogger<SpotifyService> logger, IHttpClientFactory httpClientFactory)
+        public SpotifyService(ILogger<SpotifyService> logger)
         {
             this.logger = logger;
-            spotifyClient = httpClientFactory.CreateClient("spotify");
+
+
+            spotifyClient = new HttpClient();
+
+            //spotifyClient.DefaultRequestHeaders.Authorization =
+            //    new AuthenticationHeaderValue("Bearer")
+            //        );
+
+            spotifyClient.BaseAddress = new Uri("https://api.github.com/");
         }
 
         public async Task<string> FindArtistId(string name)
