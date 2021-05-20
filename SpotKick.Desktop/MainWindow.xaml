@@ -10,17 +10,23 @@
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>
-			<ColumnDefinition Width="300"/>
+			<ColumnDefinition Width="200"/>
 			<ColumnDefinition/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition></RowDefinition>
-			<RowDefinition></RowDefinition>
-			<RowDefinition></RowDefinition>
+			<RowDefinition/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
 		</Grid.RowDefinitions>
-<TextBox x:Name="SongKickUsername" Text="stephen.cripps" TextWrapping="NoWrap"
-		         Grid.Row="0" Grid.Column="1" />
+		<TextBlock  Text="SongKick Username"
+		            Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+		<TextBox x:Name="SongKickUsername" Text="stephen.cripps" TextWrapping="NoWrap"
+		         Grid.Row="2" Grid.Column="1" Margin="0,0,0,30"/>
 		<Button x:Name="Run" Content="Run" Click="Button_Click"
-		        Grid.Row="1" Grid.Column="1" />
+		        Grid.Row="3" Grid.Column="1"/>
+		<TextBlock x:Name="ApplicationStatus" Text="" TextWrapping="NoWrap" FontSize="9"
+		         Grid.Row="4" Grid.Column="1" Margin="0,0,0,30"/>
 	</Grid>
 </Window>

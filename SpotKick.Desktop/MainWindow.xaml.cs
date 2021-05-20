@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using SpotKick.Application;
+using SpotKick.Application.Exceptions;
 
 namespace SpotKick.Desktop
 {
@@ -31,7 +32,31 @@ namespace SpotKick.Desktop
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            await playlistBuilder.Create("", SongKickUsername.Text);
+            ApplicationStatus.Text = "Running...";
+            try
+            {
+                await playlistBuilder.Create("", SongKickUsername.Text);
+                ApplicationStatus.Text = "Successfully Updated Playlist";
+            }
+            catch (Exception exception)
+            {
+                SetExceptionMessage(exception);
+            }
+        }
+
+
+        public void SetExceptionMessage(Exception ex)
+        {
+            ApplicationStatus.Foreground = Brushes.Red;
+            switch (ex)
+            {
+                case SongKickUserNotFoundException _:
+                    ApplicationStatus.Text = "SongKick user not found";
+                    break;
+                default:
+                    ApplicationStatus.Text = "An Unexpected Error Occurred";
+                    break;
+            }
         }
     }
 }

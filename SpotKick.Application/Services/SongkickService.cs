@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SpotKick.Application.Exceptions;
 using SpotKick.Application.Models;
 using SpotKick.Application.ResponseModels.SongkickResults;
 
@@ -28,6 +30,13 @@ namespace SpotKick.Application.Services
             {
                 var uri = $"https://api.songkick.com/api/3.0/users/{username}/calendar.json?reason=tracked_artist&apikey={apiKey}&page={page}&attendance=all";
                 var response = await client.GetAsync(uri);
+                if (!response.IsSuccessStatusCode)
+                {
+                    if(response.StatusCode == HttpStatusCode.NotFound)
+                        throw new SongKickUserNotFoundException(username);
+
+                    throw new HttpRequestException("Error contacting SongKick: " + response.StatusCode);
+                }
                 results = JsonConvert.DeserializeObject<Gigs>(await response.Content.ReadAsStringAsync()).ResultsPage;
                 entries.AddRange(results.Results.CalendarEntry);
                 page++;

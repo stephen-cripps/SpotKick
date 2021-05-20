@@ -31,6 +31,8 @@ namespace SpotKick.Application
             var gigs = await songkickService.FindGigs(songKickUsername);
             logger.LogTrace("Found Gigs");
 
+            return;
+
             throw new NotImplementedException();
             var trackIds = new List<string>();
             var artistsFound = 0;
