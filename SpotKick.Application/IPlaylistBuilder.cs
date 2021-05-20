@@ -8,6 +8,6 @@ namespace SpotKick.Application
 {
     public interface IPlaylistBuilder
     {
-        Task Create();
+        Task Create(string spotifyAccessToken, string songKickUsername);
     }
 }

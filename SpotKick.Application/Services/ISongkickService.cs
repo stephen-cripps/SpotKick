@@ -8,6 +8,6 @@ namespace SpotKick.Application.Services
 {
     public interface ISongkickService
     {
-        Task<List<Gig>> FindGigs();
+        Task<List<Gig>> FindGigs(string username);
     }
 }

@@ -38,7 +38,6 @@ namespace SpotKick.Desktop
             services
                 .AddTransient<ISpotifyService, SpotifyService>()
                 .AddTransient<ISongkickService, SongkickService>(x => new SongkickService(
-                    config["SongkickUsername"],
                     config["SongkickApiKey"]
                 ))
                 .AddLogging()

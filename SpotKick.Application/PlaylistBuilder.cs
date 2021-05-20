@@ -26,11 +26,12 @@ namespace SpotKick.Application
             this.songkickService = songkickService;
         }
 
-        public async Task Create()
+        public async Task Create(string spotifyAccessToken, string songKickUsername)
         {
-            var gigs = await songkickService.FindGigs();
+            var gigs = await songkickService.FindGigs(songKickUsername);
             logger.LogTrace("Found Gigs");
 
+            throw new NotImplementedException();
             var trackIds = new List<string>();
             var artistsFound = 0;
             var trackedArtists = gigs

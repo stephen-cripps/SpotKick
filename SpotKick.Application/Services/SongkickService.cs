@@ -10,16 +10,14 @@ namespace SpotKick.Application.Services
 {
     public class SongkickService : ISongkickService
     {
-        readonly string username;
         readonly string apiKey;
 
-        public SongkickService(string username, string apiKey)
+        public SongkickService(string apiKey)
         {
-            this.username = username;
             this.apiKey = apiKey;
         }
 
-        public async Task<List<Gig>> FindGigs()
+        public async Task<List<Gig>> FindGigs(string username)
         {
             var client = new HttpClient();
             var entries = new List<CalendarEntry>();

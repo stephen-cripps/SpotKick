@@ -31,7 +31,7 @@ namespace SpotKick.Desktop
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            await playlistBuilder.Create();
+            await playlistBuilder.Create("", SongKickUsername.Text);
         }
     }
 }
