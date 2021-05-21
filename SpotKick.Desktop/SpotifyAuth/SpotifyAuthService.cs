@@ -30,7 +30,7 @@ namespace SpotKick.Desktop.SpotifyAuth
             var state = Guid.NewGuid().ToString();
 
             var url =
-                $"https://accounts.spotify.com/authorize?client_id={clientId}&response_type=code&redirect_uri={redirectUrl}&code_challenge_method=S256&code_challenge={verifier.Challenge}&state={state}";
+                $"https://accounts.spotify.com/authorize?client_id={clientId}&response_type=code&redirect_uri={redirectUrl}&code_challenge_method=S256&code_challenge={verifier.Challenge}&state={state}&scope=playlist-modify-private,playlist-modify-public";
 
             var code = await LocalServerCodeReceiver.ReceiveCodeAsync(url, redirectUrl, state);
 

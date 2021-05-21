@@ -43,12 +43,14 @@ namespace SpotKick.Application
                     artistId = await spotifyService.FindArtistId(artist);
                     if (artistId != null)
                         artistsFound++;
+                    else throw new Exception("Artist not found");
                 }
                 catch (Exception e)
                 {
                     logger.LogError("Error finding ID for " + artist);
                     logger.LogError(e.Message);
                     logger.LogError(e.StackTrace);
+                    continue;
                 }
 
                 try
