@@ -24,36 +24,43 @@ namespace SpotKick.Desktop
             InitializeComponent();
         }
 
-        private async void Run_Click(object sender, RoutedEventArgs e)
+
+        private void LoginRun_Click(object sender, RoutedEventArgs e)
         {
             ApplicationStatus.Foreground = Brushes.Black;
-            ApplicationStatus.Text = "Running...";
+            ApplicationStatus.Text = "";
             try
             {
-                //TODO: Check if access token has expired
-                await playlistBuilder.Create(spotifyCredentials.AccessToken, SongKickUsername.Text);
-                ApplicationStatus.Text = "Successfully Updated Playlist";
+                if (spotifyCredentials?.AccessToken == null || DateTime.Now > spotifyCredentials.ExpiresOn)
+                    SpotifyLogin();
+                else
+                    Run();
             }
             catch (Exception exception)
             {
-                SetRunExceptionMessage(exception);
+                SetExceptionMessage(exception);
             }
         }
 
-        private async void SpotifyLogin_Click(object sender, RoutedEventArgs e)
+        private async void Run()
         {
-            SpotifyError.Text = "";
-            try
-            {
-                spotifyCredentials = await spotifyAuthService.LogIn();
-            }
-            catch (Exception)
-            {
-                SpotifyError.Text = "An Unexpected Error Occurred";
-            }
+            ApplicationStatus.Foreground = Brushes.Black;
+            ApplicationStatus.Text = "Running...";
+
+            //TODO: Check if access token has expired
+            await playlistBuilder.Create(spotifyCredentials.AccessToken, SongKickUsername.Text);
+            ApplicationStatus.Text = "Successfully Updated Playlist";
         }
 
-        public void SetRunExceptionMessage(Exception ex)
+        private async void SpotifyLogin()
+        {
+            ApplicationStatus.Text = "Logging In";
+            spotifyCredentials = await spotifyAuthService.LogIn();
+            ApplicationStatus.Text = "";
+            LoginRun.Content = "Run"; //This is a bit weird, find a better way to do this
+        }
+
+        public void SetExceptionMessage(Exception ex)
         {
             ApplicationStatus.Foreground = Brushes.Red;
             ApplicationStatus.Text = ex switch
