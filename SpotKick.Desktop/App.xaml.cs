@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Configuration;
-using System.IO;
-using System.Net.Http.Headers;
 using System.Windows;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotKick.Application;
 using SpotKick.Application.Services;
