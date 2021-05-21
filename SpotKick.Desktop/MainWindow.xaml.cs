@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using SpotKick.Application;
 using SpotKick.Application.Exceptions;
+using SpotKick.Desktop.SpotifyAuth;
+
 
 namespace SpotKick.Desktop
 {
@@ -23,40 +14,54 @@ namespace SpotKick.Desktop
     public partial class MainWindow : Window
     {
         readonly IPlaylistBuilder playlistBuilder;
+        readonly ISpotifyAuthService spotifyAuthService;
+        SpotifyCredentials spotifyCredentials;
 
-        public MainWindow(IPlaylistBuilder playlistBuilder)
+        public MainWindow(IPlaylistBuilder playlistBuilder, ISpotifyAuthService spotifyAuthService)
         {
             this.playlistBuilder = playlistBuilder;
+            this.spotifyAuthService = spotifyAuthService;
             InitializeComponent();
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void Run_Click(object sender, RoutedEventArgs e)
         {
+            ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "Running...";
             try
             {
-                await playlistBuilder.Create("", SongKickUsername.Text);
+                //TODO: Check if access token has expired
+                await playlistBuilder.Create(spotifyCredentials.AccessToken, SongKickUsername.Text);
                 ApplicationStatus.Text = "Successfully Updated Playlist";
             }
             catch (Exception exception)
             {
-                SetExceptionMessage(exception);
+                SetRunExceptionMessage(exception);
             }
         }
 
+        private async void SpotifyLogin_Click(object sender, RoutedEventArgs e)
+        {
+            SpotifyError.Text = "";
+            try
+            {
+                spotifyCredentials = await spotifyAuthService.LogIn();
+            }
+            catch (Exception)
+            {
+                SpotifyError.Text = "An Unexpected Error Occurred";
+            }
+        }
 
-        public void SetExceptionMessage(Exception ex)
+        public void SetRunExceptionMessage(Exception ex)
         {
             ApplicationStatus.Foreground = Brushes.Red;
-            switch (ex)
+            ApplicationStatus.Text = ex switch
             {
-                case SongKickUserNotFoundException _:
-                    ApplicationStatus.Text = "SongKick user not found";
-                    break;
-                default:
-                    ApplicationStatus.Text = "An Unexpected Error Occurred";
-                    break;
-            }
+                SpotifyAuthException _ => "An error occurred authenticating the spotify account",
+                SongKickUserNotFoundException _ => "SongKick user not found",
+                _ => "An Unexpected Error Occurred"
+            };
         }
     }
 }

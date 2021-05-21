@@ -5,8 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SpotKick.Desktop"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="300
-		">
+        Title="SPOTKICK" Height="200" Width="300">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>
@@ -19,14 +18,20 @@
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
 		</Grid.RowDefinitions>
 		<TextBlock  Text="SongKick Username"
 		            Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
 		<TextBox x:Name="SongKickUsername" Text="stephen.cripps" TextWrapping="NoWrap"
 		         Grid.Row="2" Grid.Column="1" Margin="0,0,0,30"/>
-		<Button x:Name="Run" Content="Run" Click="Button_Click"
-		        Grid.Row="3" Grid.Column="1"/>
+		<Button x:Name="Spotify" Content="Spotify Login" 
+		        Grid.Row="3" Grid.Column="1"  Margin="0,0,0,5" Click="SpotifyLogin_Click"/>
+		<TextBlock x:Name="SpotifyError" Text="" TextWrapping="NoWrap" FontSize="9" Foreground="Red"
+		           Grid.Row="4" Grid.Column="1" Margin="0,0,0,10"/>
+		<Button x:Name="Run" Content="Run" Click="Run_Click"
+		        Grid.Row="5" Grid.Column="1"/>
 		<TextBlock x:Name="ApplicationStatus" Text="" TextWrapping="NoWrap" FontSize="9"
-		         Grid.Row="4" Grid.Column="1" Margin="0,0,0,30"/>
+		         Grid.Row="6" Grid.Column="1" Margin="0,0,0,20"/>
 	</Grid>
 </Window>

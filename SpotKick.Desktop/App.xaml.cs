@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Windows;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotKick.Application;
 using SpotKick.Application.Services;
+using SpotKick.Desktop.SpotifyAuth;
 
 namespace SpotKick.Desktop
 {
@@ -15,31 +17,18 @@ namespace SpotKick.Desktop
     public partial class App : System.Windows.Application
     {
         ServiceProvider serviceProvider;
-        IConfigurationRoot config;
         public App()
         {
-            ServiceCollection services = new ServiceCollection();
-            GetConfig();
+            var services = new ServiceCollection();
             ConfigureServices(services);
             serviceProvider = services.BuildServiceProvider();
         }
 
-        private void GetConfig()
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("AppSettings.json", optional: false, reloadOnChange: true);
-            config = builder.Build();
-        }
-
         private void ConfigureServices(ServiceCollection services)
         {
-
             services
-                .AddTransient<ISpotifyService, SpotifyService>()
-                .AddTransient<ISongkickService, SongkickService>(x => new SongkickService(
-                    config["SongkickApiKey"]
-                ))
+                .AddTransient<ISongkickService, SongkickService>(x => new SongkickService(ConfigurationManager.AppSettings["SongkickApiKey"]))
+                .AddTransient<ISpotifyAuthService, SpotifyAuthService>()
                 .AddLogging()
                 .AddTransient<IPlaylistBuilder, PlaylistBuilder>()
                 .AddSingleton<MainWindow>();

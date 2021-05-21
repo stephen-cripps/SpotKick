@@ -16,13 +16,11 @@ namespace SpotKick.Application
     public class PlaylistBuilder : IPlaylistBuilder
     {
         readonly ILogger<PlaylistBuilder> logger;
-        readonly ISpotifyService spotifyService;
         readonly ISongkickService songkickService;
 
-        public PlaylistBuilder(ILogger<PlaylistBuilder> logger, ISpotifyService spotifyService, ISongkickService songkickService)
+        public PlaylistBuilder(ILogger<PlaylistBuilder> logger, ISongkickService songkickService)
         {
             this.logger = logger;
-            this.spotifyService = spotifyService;
             this.songkickService = songkickService;
         }
 
@@ -31,9 +29,6 @@ namespace SpotKick.Application
             var gigs = await songkickService.FindGigs(songKickUsername);
             logger.LogTrace("Found Gigs");
 
-            return;
-
-            throw new NotImplementedException();
             var trackIds = new List<string>();
             var artistsFound = 0;
             var trackedArtists = gigs
@@ -41,6 +36,8 @@ namespace SpotKick.Application
                 .Where(gig => gig.Status != Status.Postponed)
                 .SelectMany(gig => gig.TrackedArtists)
                 .ToList();
+
+            var spotifyService = new SpotifyService(spotifyAccessToken);
 
             foreach (var artist in trackedArtists)
             {
@@ -73,7 +70,7 @@ namespace SpotKick.Application
 
             logger.LogTrace($"Found {artistsFound} of {trackedArtists.Count} artists");
 
-            var playlistId = await spotifyService.GetPlaylistId("Spotkick - Console Test");
+            var playlistId = await spotifyService.GetPlaylistId("SpotKick - Test");
             logger.LogTrace("Playlist Id:" + playlistId);
 
             await spotifyService.UpdatePlaylist(playlistId, trackIds);
