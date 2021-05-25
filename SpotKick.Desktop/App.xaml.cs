@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SpotKick.Application;
 using SpotKick.Application.Services;
 using SpotKick.Desktop.SpotifyAuth;
+using SpotKick.Desktop.UserRepository;
 
 namespace SpotKick.Desktop
 {
@@ -26,6 +27,7 @@ namespace SpotKick.Desktop
             services
                 .AddTransient<ISongkickService, SongkickService>(x => new SongkickService(ConfigurationManager.AppSettings["SongkickApiKey"]))
                 .AddTransient<ISpotifyAuthService, SpotifyAuthService>()
+                .AddTransient<IUserRepo, UserRepo>()
                 .AddLogging()
                 .AddTransient<IPlaylistBuilder, PlaylistBuilder>()
                 .AddSingleton<MainWindow>();

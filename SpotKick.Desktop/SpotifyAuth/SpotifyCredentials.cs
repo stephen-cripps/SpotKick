@@ -14,5 +14,8 @@ namespace SpotKick.Desktop.SpotifyAuth
         [JsonProperty("Expires_In")]
         public int ExpiresIn { get; set; }
         public DateTime ExpiresOn { get; set; }
+
+        public bool UserIsValid => AccessToken != null && DateTime.Now.AddMinutes(59) < ExpiresOn;
     }
 }
+    

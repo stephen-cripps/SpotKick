@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SpotKick.Desktop"
         mc:Ignorable="d"
-        Title="SPOTKICK" Height="200" Width="300">
+        Title="SPOTKICK" Width="300"
+        SizeToContent="Height">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>
@@ -13,21 +14,18 @@
 			<ColumnDefinition/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition/>
-			<RowDefinition Height ="auto"/>
-			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 		</Grid.RowDefinitions>
 		<TextBlock  Text="SongKick Username"
-		            Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
-		<TextBox x:Name="SongKickUsername" Text="stephen.cripps" TextWrapping="NoWrap"
-		         Grid.Row="2" Grid.Column="1" Margin="0,0,0,30"/>
-		<Button x:Name="LoginRun" Content="Spotify Login"
-		        Grid.Row="5" Grid.Column="1" Click="LoginRun_Click"/>
+		            Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+		<TextBox x:Name="SongKickUsername" TextWrapping="NoWrap" Text="{Binding SongKickUsername}"
+		         Grid.Row="1" Grid.Column="1" Margin="0,0,0,30"/>
+		<Button x:Name="LoginRun" Content="{Binding ButtonText}"
+		        Grid.Row="2" Grid.Column="1" Click="LoginRun_Click" />
 		<TextBlock x:Name="ApplicationStatus" Text="" TextWrapping="NoWrap" FontSize="9"
-		         Grid.Row="6" Grid.Column="1" Margin="0,0,0,20"/>
+		         Grid.Row="3" Grid.Column="1" Margin="0,0,0,30"/>
 	</Grid>
 </Window>

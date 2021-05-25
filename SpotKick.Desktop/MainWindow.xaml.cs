@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Globalization;
+using System.Net.Mime;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using SpotKick.Application;
 using SpotKick.Application.Exceptions;
 using SpotKick.Desktop.SpotifyAuth;
+using SpotKick.Desktop.UserRepository;
 
 
 namespace SpotKick.Desktop
@@ -15,15 +20,33 @@ namespace SpotKick.Desktop
     {
         readonly IPlaylistBuilder playlistBuilder;
         readonly ISpotifyAuthService spotifyAuthService;
-        SpotifyCredentials spotifyCredentials;
+        readonly IUserRepo userRepo;
 
-        public MainWindow(IPlaylistBuilder playlistBuilder, ISpotifyAuthService spotifyAuthService)
+        readonly UserData context = new UserData()
+        {
+            SpotifyCredentials = new SpotifyCredentials(),
+            SongKickUsername = ""
+        };
+
+        public MainWindow(IPlaylistBuilder playlistBuilder, ISpotifyAuthService spotifyAuthService, IUserRepo userRepo)
         {
             this.playlistBuilder = playlistBuilder;
             this.spotifyAuthService = spotifyAuthService;
+            this.userRepo = userRepo;
             InitializeComponent();
+            DataContext = context;
+            //InitialiseUser();
         }
 
+        private void InitialiseUser()
+        {
+            this.DataContext = userRepo.GetPreviousUser() ?? new UserData()
+            {
+                SpotifyCredentials = new SpotifyCredentials()
+            };
+
+            // If user is invalid, try refresh
+        }
 
         private void LoginRun_Click(object sender, RoutedEventArgs e)
         {
@@ -31,10 +54,10 @@ namespace SpotKick.Desktop
             ApplicationStatus.Text = "";
             try
             {
-                if (spotifyCredentials?.AccessToken == null || DateTime.Now > spotifyCredentials.ExpiresOn)
-                    SpotifyLogin();
+                if (context.SpotifyCredentials.UserIsValid)
+                    Run(); // Why is this not catching the exception? 
                 else
-                    Run();
+                    SpotifyLogin();
             }
             catch (Exception exception)
             {
@@ -46,18 +69,18 @@ namespace SpotKick.Desktop
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "Running...";
-
-            //TODO: Check if access token has expired
-            await playlistBuilder.Create(spotifyCredentials.AccessToken, SongKickUsername.Text);
+            userRepo.StoreCurrentUser(context);
+            await playlistBuilder.Create(context.SpotifyCredentials.AccessToken, context.SongKickUsername);
             ApplicationStatus.Text = "Successfully Updated Playlist";
         }
 
         private async void SpotifyLogin()
         {
             ApplicationStatus.Text = "Logging In";
-            spotifyCredentials = await spotifyAuthService.LogIn();
+            context.SpotifyCredentials = await spotifyAuthService.LogIn();
             ApplicationStatus.Text = "";
-            LoginRun.Content = "Run"; //This is a bit weird, find a better way to do this
+            userRepo.StoreCurrentUser(context);
+            BindingOperations.GetBindingExpression(LoginRun, Button.ContentProperty).UpdateTarget();
         }
 
         public void SetExceptionMessage(Exception ex)
