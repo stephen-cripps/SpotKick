@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:SpotKick.Desktop"
         mc:Ignorable="d"
         Title="SPOTKICK" Width="300"
-        SizeToContent="Height">
+        SizeToContent="Height"
+        Loaded =" MainWindow_OnLoaded">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>

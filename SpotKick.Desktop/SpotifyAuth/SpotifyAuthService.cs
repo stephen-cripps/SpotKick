@@ -41,7 +41,7 @@ namespace SpotKick.Desktop.SpotifyAuth
             return credentials; 
         }
 
-        public string RefreshAccessToken(string refreshToken)
+        public async Task<SpotifyCredentials> RefreshAccessToken(string refreshToken)
         {
             throw new NotImplementedException();
             //    var client = new HttpClient();
