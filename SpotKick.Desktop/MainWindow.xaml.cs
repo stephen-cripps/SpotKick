@@ -34,16 +34,20 @@ namespace SpotKick.Desktop
             this.spotifyAuthService = spotifyAuthService;
             this.userRepo = userRepo;
             InitializeComponent();
+            InitialiseUser();
             DataContext = context;
-            //InitialiseUser();
         }
 
         private void InitialiseUser()
         {
-            this.DataContext = userRepo.GetPreviousUser() ?? new UserData()
-            {
-                SpotifyCredentials = new SpotifyCredentials()
-            };
+            var previousUser = userRepo.GetPreviousUser();
+            if (previousUser == null)
+                return;
+
+            context.SpotifyCredentials = previousUser.SpotifyCredentials;
+            context.SongKickUsername = previousUser.SongKickUsername;
+
+            var test = context.ButtonText;
 
             // If user is invalid, try refresh
         }
