@@ -7,7 +7,5 @@ namespace SpotKick.Desktop.SpotifyAuth
         Task<SpotifyCredentials> LogIn();
 
         Task<SpotifyCredentials> RefreshAccessToken(string refreshToken);
-
-        void ForgetUser();
     }
 }

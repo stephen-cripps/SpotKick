@@ -38,45 +38,37 @@ namespace SpotKick.Desktop.SpotifyAuth
 
             credentials.ExpiresOn = DateTime.Now.AddSeconds(credentials.ExpiresIn);
 
-            return credentials; 
+            return credentials;
         }
 
         public async Task<SpotifyCredentials> RefreshAccessToken(string refreshToken)
         {
-            throw new NotImplementedException();
-            //    var client = new HttpClient();
+            var client = new HttpClient();
 
-            //    var body = new Dictionary<string, string>()
-            //    {
-            //        {"grant_type","refresh_token" },
-            //        { "refresh_token" ,refreshToken}
-            //    };
+            var body = new Dictionary<string, string>()
+                {
+                    {"grant_type","refresh_token" },
+                    { "refresh_token" ,refreshToken},
+                    { "client_id", clientId}
+                };
 
-            //    var request = new HttpRequestMessage()
-            //    {
-            //        RequestUri = new Uri("https://accounts.spotify.com/api/token"),
-            //        Method = HttpMethod.Post,
-            //        Content = new FormUrlEncodedContent(body)
-            //    };
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://accounts.spotify.com/api/token"),
+                Method = HttpMethod.Post,
+                Content = new FormUrlEncodedContent(body)
+            };
 
-            //    var authString = Base64Encode(clientId + ":" + clientSecret);
-            //    request.Headers.Authorization = new AuthenticationHeaderValue("Basic", authString);
+            var response = await client.SendAsync(request);
 
-            //    var response = await client.SendAsync(request);
+            if(!response.IsSuccessStatusCode)
+                throw new SpotifyAuthException("Could not refresh spotify token: "+ response.StatusCode);
 
-            //    return JsonConvert.DeserializeObject<Auth>(await response.Content.ReadAsStringAsync()).AccessToken;
-            //}
+            var credentials = JsonConvert.DeserializeObject<SpotifyCredentials>(await response.Content.ReadAsStringAsync());
 
-            //static string Base64Encode(string plainText)
-            //{
-            //    var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            //    return Convert.ToBase64String(plainTextBytes);
-            //}
-        }
+            credentials.ExpiresOn = DateTime.Now.AddSeconds(credentials.ExpiresIn);
 
-        public void ForgetUser()
-        {
-            throw new System.NotImplementedException();
+            return credentials;
         }
 
         async Task<SpotifyCredentials> GetAccessTokenFromCode(string code, string verifier)

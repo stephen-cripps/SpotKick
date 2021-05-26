@@ -137,9 +137,10 @@ namespace SpotKick.Desktop
                 LoginRun.IsEnabled = false;
                 context.SpotifyCredentials = await spotifyAuthService.RefreshAccessToken(context.SpotifyCredentials.RefreshToken);
                 ApplicationStatus.Text = "";
+                userRepo.StoreCurrentUser(context);
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 ApplicationStatus.Text = "Spotify token expired, please log in again";
                 return false;
