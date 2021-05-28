@@ -47,9 +47,9 @@ namespace SpotKick.Desktop.SpotifyAuth
 
             var body = new Dictionary<string, string>()
                 {
-                    {"grant_type","refresh_token" },
-                    { "refresh_token" ,refreshToken},
-                    { "client_id", clientId}
+                    { "grant_type","refresh_token" },
+                    { "refresh_token" ,refreshToken },
+                    { "client_id", clientId }
                 };
 
             var request = new HttpRequestMessage()
@@ -61,8 +61,8 @@ namespace SpotKick.Desktop.SpotifyAuth
 
             var response = await client.SendAsync(request);
 
-            if(!response.IsSuccessStatusCode)
-                throw new SpotifyAuthException("Could not refresh spotify token: "+ response.StatusCode);
+            if (!response.IsSuccessStatusCode)
+                throw new SpotifyAuthException("Could not refresh spotify token: " + response.StatusCode);
 
             var credentials = JsonConvert.DeserializeObject<SpotifyCredentials>(await response.Content.ReadAsStringAsync());
 

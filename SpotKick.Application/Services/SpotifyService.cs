@@ -15,7 +15,6 @@ namespace SpotKick.Application.Services
 
         public SpotifyService(string authToken)
         {
-
             spotifyClient = new HttpClient();
 
             spotifyClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
@@ -92,6 +91,15 @@ namespace SpotKick.Application.Services
 
                 await spotifyClient.SendAsync(request);
             }
+        }
+
+        public async Task<string> GetUsername()
+        {
+            var uri = $"https://api.spotify.com/v1/me";
+
+            var response = await spotifyClient.GetAsync(uri);
+
+           return JsonConvert.DeserializeObject<CurrentUser>(await response.Content.ReadAsStringAsync()).Username;
         }
     }
 }

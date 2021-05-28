@@ -12,5 +12,7 @@ namespace SpotKick.Application.Services
         Task<string> GetPlaylistId(string name);
 
         Task UpdatePlaylist(string id, IReadOnlyCollection<string> tracks);
+
+        Task<string> GetUsername();
     }
 }

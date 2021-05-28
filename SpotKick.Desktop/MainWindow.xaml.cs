@@ -1,13 +1,9 @@
 ﻿using System;
-using System.DirectoryServices.ActiveDirectory;
-using System.Globalization;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
+using MediatR;
 using SpotKick.Application;
 using SpotKick.Application.Exceptions;
 using SpotKick.Desktop.SpotifyAuth;
@@ -21,36 +17,35 @@ namespace SpotKick.Desktop
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly IPlaylistBuilder playlistBuilder;
         readonly ISpotifyAuthService spotifyAuthService;
         readonly IUserRepo userRepo;
-        DispatcherTimer dispatcherTimer;
+        readonly IMediator mediator;
+        UserData user = new UserData();
+        readonly ContextModel context = new ContextModel();
 
-        readonly UserData context = new UserData()
+
+        public MainWindow(ISpotifyAuthService spotifyAuthService, IUserRepo userRepo, IMediator mediator)
         {
-            SpotifyCredentials = new SpotifyCredentials(),
-            SongKickUsername = ""
-        };
-
-
-        public MainWindow(IPlaylistBuilder playlistBuilder, ISpotifyAuthService spotifyAuthService, IUserRepo userRepo)
-        {
-            this.playlistBuilder = playlistBuilder;
             this.spotifyAuthService = spotifyAuthService;
             this.userRepo = userRepo;
+            this.mediator = mediator;
             InitializeComponent();
             DataContext = context;
 
-            //Poll to check user validity
-            dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-            dispatcherTimer.Tick += new EventHandler(CheckUserToken);
-            dispatcherTimer.Interval = TimeSpan.FromSeconds(60);
+            //Check every 5 minutes the user is not about to expire
+            var dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += CheckUserToken;
+            dispatcherTimer.Interval = TimeSpan.FromMinutes(5);
             dispatcherTimer.Start();
         }
 
+        /// <summary>
+        /// Code to run once window has loaded.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            //Initialise the user
             await InitialiseUser();
         }
 
@@ -61,25 +56,32 @@ namespace SpotKick.Desktop
         /// <param name="e"></param>
         async void CheckUserToken(object sender, System.EventArgs e)
         {
-            if (context.SpotifyCredentials.UserIsValid || await SpotifyRefresh())
-                return;
-
-            BindingOperations.GetBindingExpression(LoginRun, Button.ContentProperty).UpdateTarget();
-        }
-
-        private async Task InitialiseUser()
-        {
-            var previousUser = userRepo.GetPreviousUser();
-            if (previousUser == null)
-                return;
-
-            context.SpotifyCredentials = previousUser.SpotifyCredentials;
-            context.SongKickUsername = previousUser.SongKickUsername;
-
-            if (!context.SpotifyCredentials.UserIsValid)
+            if (!user.SpotifyCredentials.UserIsValid)
                 await SpotifyRefresh();
         }
 
+        /// <summary>
+        /// Checks stored user data. Performs token refresh if required.
+        /// </summary>
+        /// <returns></returns>
+        private async Task InitialiseUser()
+        {
+            user = userRepo.GetPreviousUser();
+
+            if (user == null)
+                return;
+
+            if (!user.SpotifyCredentials.UserIsValid)
+                await SpotifyRefresh();
+
+            UpdateContext();
+        }
+
+        /// <summary>
+        /// If user has a valid spotify token, runs the program. Else prompts user to log in. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void LoginRun_Click(object sender, RoutedEventArgs e)
         {
             ApplicationStatus.Foreground = Brushes.Black;
@@ -87,8 +89,11 @@ namespace SpotKick.Desktop
             try
             {
                 LoginRun.IsEnabled = false;
-                if (context.SpotifyCredentials.UserIsValid)
-                    await Run();
+                if (context.ButtonText == "Update Playlists")
+                {
+                    if (user.SpotifyCredentials.UserIsValid || await SpotifyRefresh())
+                        await Run();
+                }
                 else
                     await SpotifyLogin();
             }
@@ -102,24 +107,39 @@ namespace SpotKick.Desktop
             }
         }
 
+        /// <summary>
+        /// Runs the CreatePlaylist command 
+        /// </summary>
+        /// <returns></returns>
         async Task Run()
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "Running...";
-            userRepo.StoreCurrentUser(context);
-            await playlistBuilder.Create(context.SpotifyCredentials.AccessToken, context.SongKickUsername);
+            StoreUser();
+
+            var command = new CreatePlaylist.Command(user.SpotifyCredentials.AccessToken, context.SongKickUsername);
+            await mediator.Send(command);
+
             ApplicationStatus.Text = "Successfully Updated Playlist";
         }
 
+        /// <summary>
+        /// Launches the browser for a user to auth, returns Access and Refresh Tokens
+        /// </summary>
+        /// <returns></returns>
         async Task SpotifyLogin()
         {
             if (await SpotifyRefresh())
                 return;
+
             ApplicationStatus.Text = "Logging In...";
-            context.SpotifyCredentials = await spotifyAuthService.LogIn();
+
+            user.SpotifyCredentials = await spotifyAuthService.LogIn();
+            await GetUsername();
+            StoreUser();
+            UpdateContext();
+
             ApplicationStatus.Text = "";
-            userRepo.StoreCurrentUser(context);
-            BindingOperations.GetBindingExpression(LoginRun, Button.ContentProperty).UpdateTarget();
         }
 
         /// <summary>
@@ -130,14 +150,19 @@ namespace SpotKick.Desktop
         {
             try
             {
-                if (context.SpotifyCredentials.RefreshToken == null)
+                if (user.SpotifyCredentials.RefreshToken == null)
                     return false;
-                
-                ApplicationStatus.Text = "Verifying Spotify login..."; // why is this not writing>? 
-                LoginRun.IsEnabled = false;
-                context.SpotifyCredentials = await spotifyAuthService.RefreshAccessToken(context.SpotifyCredentials.RefreshToken);
+
+                throw new NotImplementedException();
+
+                ApplicationStatus.Text = "Verifying Spotify login...";
+                user.SpotifyCredentials = await spotifyAuthService.RefreshAccessToken(user.SpotifyCredentials.RefreshToken);
                 ApplicationStatus.Text = "";
-                userRepo.StoreCurrentUser(context);
+
+                if (user.SpotifyUsername == null)
+                    await GetUsername();
+
+                StoreUser();
                 return true;
             }
             catch (Exception)
@@ -147,11 +172,34 @@ namespace SpotKick.Desktop
             }
             finally
             {
-                LoginRun.IsEnabled = true;
+                UpdateContext();
             }
         }
 
-        public void SetExceptionMessage(Exception ex)
+        /// <summary>
+        /// Calls the spotify API to find a user's username
+        /// </summary>
+        async Task GetUsername()
+        {
+            var query = new ReadSpotifyUsername.Query(user.SpotifyCredentials.AccessToken);
+            user.SpotifyUsername = await mediator.Send(query);
+            UpdateContext();
+        }
+
+        /// <summary>
+        /// Gets the username from context and stores user details
+        /// </summary>
+        void StoreUser()
+        {
+            user.SongKickUsername = context.SongKickUsername;
+            userRepo.StoreCurrentUser(user);
+        }
+
+        /// <summary>
+        /// Converts exception type into error message
+        /// </summary>
+        /// <param name="ex"></param>
+        void SetExceptionMessage(Exception ex)
         {
             ApplicationStatus.Foreground = Brushes.Red;
             ApplicationStatus.Text = ex switch
@@ -160,6 +208,20 @@ namespace SpotKick.Desktop
                 SongKickUserNotFoundException _ => "SongKick user not found",
                 _ => "An Unexpected Error Occurred"
             };
+        }
+
+        /// <summary>
+        /// Refresh bound values in the UI
+        /// </summary>
+        void UpdateContext()
+        {
+            if (context.SongKickUsername == null)
+                context.SongKickUsername = user.SongKickUsername;
+
+            context.ButtonText = user.SpotifyCredentials.UserIsValid ? "Update Playlists" : "Spotify Login";
+            context.Greeting = user.SpotifyUsername != null ? "Hello " + user.SpotifyUsername + "!" : "";
+
+            var test = "";
         }
     }
 }

@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="SPOTKICK" Width="300"
         SizeToContent="Height"
-        Loaded =" MainWindow_OnLoaded">
+        Loaded ="MainWindow_OnLoaded" d:DataContext="{d:DesignInstance }">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>
@@ -19,14 +19,17 @@
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
 		</Grid.RowDefinitions>
+		<TextBlock Name="Greeting" Text="{Binding Greeting}"
+		           Grid.Row="0" Grid.Column="1" Margin="0,0,0,20"/>
 		<TextBlock  Text="SongKick Username"
-		            Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+		            Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
 		<TextBox x:Name="SongKickUsername" TextWrapping="NoWrap" Text="{Binding SongKickUsername}"
-		         Grid.Row="1" Grid.Column="1" Margin="0,0,0,30"/>
+		         Grid.Row="2" Grid.Column="1" Margin="0,0,0,30"/>
 		<Button x:Name="LoginRun" Content="{Binding ButtonText}"
-		        Grid.Row="2" Grid.Column="1" Click="LoginRun_Click" />
+		        Grid.Row="3" Grid.Column="1" Click="LoginRun_Click" />
 		<TextBlock x:Name="ApplicationStatus" Text="" TextWrapping="NoWrap" FontSize="9"
-		         Grid.Row="3" Grid.Column="1" Margin="0,0,0,30"/>
+		         Grid.Row="4" Grid.Column="1" Margin="0,0,0,30"/>
 	</Grid>
 </Window>

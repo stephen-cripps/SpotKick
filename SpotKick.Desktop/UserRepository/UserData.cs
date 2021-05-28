@@ -8,6 +8,6 @@ namespace SpotKick.Desktop.UserRepository
 
         public string SongKickUsername { get; set; }
 
-        public string ButtonText => SpotifyCredentials.UserIsValid ? "Update Playlists" : "Spotify Login";
+        public string SpotifyUsername { get; set; }
     }
 }
