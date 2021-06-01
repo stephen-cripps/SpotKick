@@ -4,16 +4,17 @@ namespace SpotKick.Desktop
 {
     public class ContextModel : ObservableObject
     {
-        string greeting;
+        bool showGreeting;
         string buttonText;
+        string spotifyUsername;
 
-        public string Greeting
+        public bool ShowGreeting
         {
-            get => string.IsNullOrEmpty(greeting) ? "" : greeting;
+            get => showGreeting;
             set
             {
-                greeting = value;
-                OnPropertyChanged(nameof(greeting));
+                showGreeting = value;
+                OnPropertyChanged(nameof(showGreeting));
             }
         }
 
@@ -26,6 +27,16 @@ namespace SpotKick.Desktop
             {
                 buttonText = value;
                 OnPropertyChanged(nameof(buttonText));
+            }
+        }
+
+        public string SpotifyUsername
+        {
+            get => string.IsNullOrEmpty(spotifyUsername) ? "" : spotifyUsername;
+            set
+            {
+                spotifyUsername = value;
+                OnPropertyChanged(nameof(spotifyUsername));
             }
         }
     }

@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SpotKick.Application.Exceptions;
 
 namespace SpotKick.Desktop.SpotifyAuth
@@ -39,11 +41,11 @@ namespace SpotKick.Desktop.SpotifyAuth
             {
                 listener.Start();
 
-                var process = new Process {StartInfo = {UseShellExecute = true, FileName = authorisationUrl}};
+                var process = new Process { StartInfo = { UseShellExecute = true, FileName = authorisationUrl } };
                 process.Start();
 
                 // Wait to get the authorization code response.
-                var context = await listener.GetContextAsync().ConfigureAwait(false);
+                var context = await listener.GetContextAsync();
                 var coll = context.Request.QueryString;
 
                 // Write a "close" response.
@@ -54,7 +56,7 @@ namespace SpotKick.Desktop.SpotifyAuth
                 }
                 context.Response.OutputStream.Close();
 
-                if(coll["state"] != state)
+                if (coll["state"] != state)
                     throw new SpotifyAuthException("The returned state was invalid");
 
                 return coll["code"];

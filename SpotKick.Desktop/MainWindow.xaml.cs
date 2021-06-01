@@ -21,7 +21,7 @@ namespace SpotKick.Desktop
         readonly IUserRepo userRepo;
         readonly IMediator mediator;
         UserData user = new UserData();
-        readonly ContextModel context = new ContextModel();
+        ContextModel context = new ContextModel();
 
 
         public MainWindow(ISpotifyAuthService spotifyAuthService, IUserRepo userRepo, IMediator mediator)
@@ -47,6 +47,7 @@ namespace SpotKick.Desktop
         async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             await InitialiseUser();
+            UpdateContext();
         }
 
         /// <summary>
@@ -66,15 +67,15 @@ namespace SpotKick.Desktop
         /// <returns></returns>
         private async Task InitialiseUser()
         {
-            user = userRepo.GetPreviousUser();
+            var previousUser = userRepo.GetPreviousUser();
 
-            if (user == null)
+            if (previousUser == null)
                 return;
+
+            user = previousUser;
 
             if (!user.SpotifyCredentials.UserIsValid)
                 await SpotifyRefresh();
-
-            UpdateContext();
         }
 
         /// <summary>
@@ -105,6 +106,20 @@ namespace SpotKick.Desktop
             {
                 LoginRun.IsEnabled = true;
             }
+        }
+
+        /// <summary>
+        /// Resets context and clears stored data
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void ForgetMe_OnClick(object sender, RoutedEventArgs e)
+        {
+            context = new ContextModel();
+            user = new UserData();
+            DataContext = context;
+            userRepo.ForgetUser();
+            UpdateContext();
         }
 
         /// <summary>
@@ -140,6 +155,7 @@ namespace SpotKick.Desktop
             UpdateContext();
 
             ApplicationStatus.Text = "";
+            Activate();
         }
 
         /// <summary>
@@ -152,8 +168,6 @@ namespace SpotKick.Desktop
             {
                 if (user.SpotifyCredentials.RefreshToken == null)
                     return false;
-
-                throw new NotImplementedException();
 
                 ApplicationStatus.Text = "Verifying Spotify login...";
                 user.SpotifyCredentials = await spotifyAuthService.RefreshAccessToken(user.SpotifyCredentials.RefreshToken);
@@ -219,9 +233,9 @@ namespace SpotKick.Desktop
                 context.SongKickUsername = user.SongKickUsername;
 
             context.ButtonText = user.SpotifyCredentials.UserIsValid ? "Update Playlists" : "Spotify Login";
-            context.Greeting = user.SpotifyUsername != null ? "Hello " + user.SpotifyUsername + "!" : "";
-
-            var test = "";
+            context.ShowGreeting = user.SpotifyUsername != null && user.SpotifyCredentials.UserIsValid;
+            context.SpotifyUsername = user.SpotifyUsername;
         }
+
     }
 }

@@ -7,11 +7,15 @@
         mc:Ignorable="d"
         Title="SPOTKICK" Width="300"
         SizeToContent="Height"
-        Loaded ="MainWindow_OnLoaded" d:DataContext="{d:DesignInstance }">
+        Loaded ="MainWindow_OnLoaded">
+	<d:Window.DataContext>
+		<d:DesignInstance />
+	</d:Window.DataContext>
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>
-			<ColumnDefinition Width="200"/>
+			<ColumnDefinition Width="150"/>
+			<ColumnDefinition Width="50"/>
 			<ColumnDefinition/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
@@ -21,15 +25,40 @@
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 		</Grid.RowDefinitions>
-		<TextBlock Name="Greeting" Text="{Binding Greeting}"
-		           Grid.Row="0" Grid.Column="1" Margin="0,0,0,20"/>
-		<TextBlock  Text="SongKick Username"
-		            Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+		<TextBlock Name="Greeting" Text= "{Binding SpotifyUsername, StringFormat={}Hello {0}!}"
+		           Grid.Row="0" Grid.Column="1" Margin="0,0,0,20">
+			<TextBlock.Style>
+				<Style TargetType="{x:Type TextBlock}">
+					<Setter Property="Visibility" Value="Hidden"/>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding ShowGreeting}" Value="True">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+					</Style.Triggers>                    
+				</Style>
+			</TextBlock.Style>
+		</TextBlock>
+		<TextBlock Name="Forget" Text=""  FontSize="9"
+		           Grid.Row="0" Grid.Column="2" Margin="0,0,0,20">
+			<TextBlock.Style>
+				<Style TargetType="{x:Type TextBlock}">
+					<Setter Property="Visibility" Value="Hidden"/>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding ShowGreeting}" Value="True">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</TextBlock.Style>
+			<Hyperlink Click="ForgetMe_OnClick">(Forget Me)</Hyperlink>
+		</TextBlock>
+		<TextBlock  Text="SongKick Username" 
+		            Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,5" />
 		<TextBox x:Name="SongKickUsername" TextWrapping="NoWrap" Text="{Binding SongKickUsername}"
-		         Grid.Row="2" Grid.Column="1" Margin="0,0,0,30"/>
+		         Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,30"/>
 		<Button x:Name="LoginRun" Content="{Binding ButtonText}"
-		        Grid.Row="3" Grid.Column="1" Click="LoginRun_Click" />
+		        Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Click="LoginRun_Click" />
 		<TextBlock x:Name="ApplicationStatus" Text="" TextWrapping="NoWrap" FontSize="9"
-		         Grid.Row="4" Grid.Column="1" Margin="0,0,0,30"/>
+		         Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,30"/>
 	</Grid>
 </Window>
