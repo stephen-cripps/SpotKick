@@ -5,6 +5,9 @@ using SpotKick.Application.Services;
 
 namespace SpotKick.Application
 {
+    /// <summary>
+    /// Vertical slice to return the signed in user's username
+    /// </summary>
     public class ReadSpotifyUsername
     {
         public class Query : IRequest<string>

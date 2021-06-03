@@ -130,7 +130,9 @@ namespace SpotKick.Desktop
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "Running...";
-            StoreUser();
+
+            user.SongKickUsername = context.SongKickUsername;
+            userRepo.StoreCurrentUser(user);
 
             var command = new CreatePlaylist.Command(user.SpotifyCredentials.AccessToken, context.SongKickUsername);
             await mediator.Send(command);
@@ -151,7 +153,7 @@ namespace SpotKick.Desktop
 
             user.SpotifyCredentials = await spotifyAuthService.LogIn();
             await GetUsername();
-            StoreUser();
+            userRepo.StoreCurrentUser(user);
             UpdateContext();
 
             ApplicationStatus.Text = "";
@@ -176,7 +178,7 @@ namespace SpotKick.Desktop
                 if (user.SpotifyUsername == null)
                     await GetUsername();
 
-                StoreUser();
+                userRepo.StoreCurrentUser(user);
                 return true;
             }
             catch (Exception)
@@ -200,14 +202,6 @@ namespace SpotKick.Desktop
             UpdateContext();
         }
 
-        /// <summary>
-        /// Gets the username from context and stores user details
-        /// </summary>
-        void StoreUser()
-        {
-            user.SongKickUsername = context.SongKickUsername;
-            userRepo.StoreCurrentUser(user);
-        }
 
         /// <summary>
         /// Converts exception type into error message

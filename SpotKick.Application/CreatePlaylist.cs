@@ -11,6 +11,9 @@ using SpotKick.Application.Services;
 
 namespace SpotKick.Application
 {
+    /// <summary>
+    /// Vertical slice to create the 3 spotkick playlists
+    /// </summary>
     public class CreatePlaylist
     {
         public class Command : IRequest
@@ -83,7 +86,7 @@ namespace SpotKick.Application
 
                 Task.WaitAll(tasks, TimeSpan.FromMinutes(5));
 
-                var playlistId = await spotifyService.GetPlaylistId(playlistName);
+                var playlistId = await spotifyService.GetOrCreatePlaylist(playlistName);
 
                 try
                 {

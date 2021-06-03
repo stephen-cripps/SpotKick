@@ -43,7 +43,6 @@ namespace SpotKick.Application.Services
                 page++;
             } while (results.Page * results.PerPage < results.TotalEntries);
 
-            //TODO: Add Automapper
             return (from calendarEntry
                     in entries
                 let artists = calendarEntry.Reason.TrackedArtist.Select(a => a.DisplayName)

@@ -69,7 +69,7 @@ namespace SpotKick.Application.Services
             }
         }
 
-        public async Task<string> GetPlaylistId(string name)
+        public async Task<string> GetOrCreatePlaylist(string name)
         {
             while (true)
             {
