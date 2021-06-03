@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpotKick.Application.ResponseModels.SpotifyResults;
 
@@ -14,12 +12,14 @@ namespace SpotKick.Application.Services
     public class SpotifyService : ISpotifyService
     {
         readonly HttpClient spotifyClient;
-        readonly ILogger<SpotifyService> logger;
 
-        public SpotifyService(ILogger<SpotifyService> logger, IHttpClientFactory httpClientFactory)
+        public SpotifyService(string authToken)
         {
-            this.logger = logger;
-            spotifyClient = httpClientFactory.CreateClient("spotify");
+            spotifyClient = new HttpClient();
+
+            spotifyClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+
+            spotifyClient.BaseAddress = new Uri("https://api.github.com/");
         }
 
         public async Task<string> FindArtistId(string name)
@@ -30,21 +30,11 @@ namespace SpotKick.Application.Services
 
             var content = await response.Content.ReadAsStringAsync();
 
-
-            //Why is content null sometimes
-            try
-            {
-                return JsonConvert.DeserializeObject<ArtistSearch>(content)
-                    .Artists
-                    .Items
-                    .FirstOrDefault()?
-                    .Id;
-            }
-            catch
-            {
-                logger.LogError("Failed FindArtistId Content: " + content);
-                throw;
-            }
+            return JsonConvert.DeserializeObject<ArtistSearch>(content)
+                .Artists
+                .Items
+                .FirstOrDefault()?
+                .Id;
         }
 
         public async Task<IEnumerable<string>> GetTopTracks(string id)
@@ -59,9 +49,7 @@ namespace SpotKick.Application.Services
 
         public async Task<string> GetPlaylistId(string name)
         {
-            var uri = "https://api.spotify.com/v1/me/playlists";
-
-            var response = await spotifyClient.GetAsync(uri);
+            var response = await spotifyClient.GetAsync("https://api.spotify.com/v1/me/playlists");
 
             var playlists = JsonConvert.DeserializeObject<UsersPlaylists>(await response.Content.ReadAsStringAsync())
                 .Playlists;
@@ -103,6 +91,15 @@ namespace SpotKick.Application.Services
 
                 await spotifyClient.SendAsync(request);
             }
+        }
+
+        public async Task<string> GetUsername()
+        {
+            var uri = $"https://api.spotify.com/v1/me";
+
+            var response = await spotifyClient.GetAsync(uri);
+
+           return JsonConvert.DeserializeObject<CurrentUser>(await response.Content.ReadAsStringAsync()).Username;
         }
     }
 }

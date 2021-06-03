@@ -62,5 +62,5 @@ namespace SpotKick.Application.ResponseModels.SongkickResults
         public string City { get; set; }
     }
 
-    public enum Status { Ok, Postponed };
+    public enum Status { Ok, Postponed, Cancelled };
 }

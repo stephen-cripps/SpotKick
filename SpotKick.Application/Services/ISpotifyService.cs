@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SpotKick.Application.Services
@@ -14,5 +12,7 @@ namespace SpotKick.Application.Services
         Task<string> GetPlaylistId(string name);
 
         Task UpdatePlaylist(string id, IReadOnlyCollection<string> tracks);
+
+        Task<string> GetUsername();
     }
 }
