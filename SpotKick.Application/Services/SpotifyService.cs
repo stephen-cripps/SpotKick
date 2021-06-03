@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SpotKick.Application.ResponseModels.SpotifyResults;
@@ -26,41 +28,74 @@ namespace SpotKick.Application.Services
         {
             var uri = Uri.EscapeUriString($"https://api.spotify.com/v1/search?q={name}&type=artist");
 
-            var response = await spotifyClient.GetAsync(uri);
+            while (true)
+            {
+                var response = await spotifyClient.GetAsync(uri);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
 
-            var content = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<ArtistSearch>(content)
+                        .Artists
+                        .Items
+                        .FirstOrDefault()?
+                        .Id;
+                }
 
-            return JsonConvert.DeserializeObject<ArtistSearch>(content)
-                .Artists
-                .Items
-                .FirstOrDefault()?
-                .Id;
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    Thread.Sleep(response.Headers.RetryAfter.Delta.Value.Milliseconds);
+                }
+                else
+                    throw new HttpRequestException($"Error Getting Id for {name}: {response.StatusCode}");
+            }
         }
 
         public async Task<IEnumerable<string>> GetTopTracks(string id)
         {
             var uri = $"https://api.spotify.com/v1/artists/{id}/top-tracks?country=from_token";
+            while (true)
+            {
+                var response = await spotifyClient.GetAsync(uri);
 
-            var response = await spotifyClient.GetAsync(uri);
+                if (response.IsSuccessStatusCode) return JsonConvert.DeserializeObject<TopTracks>(await response.Content.ReadAsStringAsync()).Tracks.Select(t => t.Id);
 
-            return JsonConvert.DeserializeObject<TopTracks>(await response.Content.ReadAsStringAsync()).Tracks
-                .Select(t => t.Id);
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    Thread.Sleep(response.Headers.RetryAfter.Delta.Value.Milliseconds);
+                }
+                else
+                    throw new HttpRequestException($"Error Getting Tracks for {id}: {response.StatusCode}");
+            }
         }
 
-        public async Task<string> GetPlaylistId(string name)
+        public async Task<string> GetOrCreatePlaylist(string name)
         {
-            var response = await spotifyClient.GetAsync("https://api.spotify.com/v1/me/playlists");
+            while (true)
+            {
+                var response = await spotifyClient.GetAsync("https://api.spotify.com/v1/me/playlists");
 
-            var playlists = JsonConvert.DeserializeObject<UsersPlaylists>(await response.Content.ReadAsStringAsync())
-                .Playlists;
+                if (response.IsSuccessStatusCode)
+                {
 
-            return playlists.Any(p => p.Name == name) ? playlists.SingleOrDefault(p => p.Name == name)?.Id : await BuildPlaylist(name);
+                    var playlists = JsonConvert.DeserializeObject<UsersPlaylists>(await response.Content.ReadAsStringAsync())
+                        .Playlists;
+
+                    return playlists.Any(p => p.Name == name) ? playlists.SingleOrDefault(p => p.Name == name)?.Id : await BuildPlaylist(name);
+                }
+
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    Thread.Sleep(response.Headers.RetryAfter.Delta.Value.Milliseconds);
+                }
+                else
+                    throw new HttpRequestException($"Error Getting playlist id for {name}: {response.StatusCode}");
+            }
         }
 
         async Task<string> BuildPlaylist(string name)
         {
-            var userResponse = await spotifyClient.GetAsync("https://api.spotify.com/v1/me/");
-            var userId = JsonConvert.DeserializeObject<CurrentUser>(await userResponse.Content.ReadAsStringAsync()).Id;
+            var userId = (await GetCurrentUser()).Id;
 
             var request = new HttpRequestMessage()
             {
@@ -71,8 +106,20 @@ namespace SpotKick.Application.Services
 
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var response = await spotifyClient.SendAsync(request);
-            return JsonConvert.DeserializeObject<ResponseModels.SpotifyResults.CreatePlaylist>(await response.Content.ReadAsStringAsync()).Id;
+            while (true)
+            {
+                var response = await spotifyClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                    return JsonConvert.DeserializeObject<ResponseModels.SpotifyResults.CreatePlaylist>(await response.Content.ReadAsStringAsync()).Id;
+
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    Thread.Sleep(response.Headers.RetryAfter.Delta.Value.Milliseconds);
+                }
+                else
+                    throw new HttpRequestException($"Error building playlist for {name}: {response.StatusCode}");
+            }
         }
 
         public async Task UpdatePlaylist(string id, IReadOnlyCollection<string> tracks)
@@ -89,17 +136,41 @@ namespace SpotKick.Application.Services
                 };
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                await spotifyClient.SendAsync(request);
+                while (true)
+                {
+                    var response = await spotifyClient.SendAsync(request);
+
+                    if (response.IsSuccessStatusCode)
+                        break;
+
+                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        Thread.Sleep(response.Headers.RetryAfter.Delta.Value.Milliseconds);
+                    }
+                    else
+                        throw new HttpRequestException($"Error updating playlist {id}: {response.StatusCode}");
+                }
             }
         }
 
-        public async Task<string> GetUsername()
+        public async Task<string> GetUsername() => (await GetCurrentUser()).Username;
+
+        async Task<CurrentUser> GetCurrentUser()
         {
-            var uri = $"https://api.spotify.com/v1/me";
+            while (true)
+            {
+                var response = await spotifyClient.GetAsync("https://api.spotify.com/v1/me");
 
-            var response = await spotifyClient.GetAsync(uri);
+                if (response.IsSuccessStatusCode)
+                    return JsonConvert.DeserializeObject<CurrentUser>(await response.Content.ReadAsStringAsync());
 
-           return JsonConvert.DeserializeObject<CurrentUser>(await response.Content.ReadAsStringAsync()).Username;
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    Thread.Sleep(response.Headers.RetryAfter.Delta.Value.Milliseconds);
+                }
+                else
+                    throw new HttpRequestException($"Error getting current user: {response.StatusCode}");
+            }
         }
     }
 }

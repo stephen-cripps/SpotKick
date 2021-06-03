@@ -45,7 +45,7 @@ namespace SpotKick.Application.ResponseModels.SongkickResults
 
     public class Event
     {
-        public Status Status { get; set; }
+        public string Status { get; set; }
 
         public Start Start { get; set; }
 
@@ -61,6 +61,4 @@ namespace SpotKick.Application.ResponseModels.SongkickResults
     {
         public string City { get; set; }
     }
-
-    public enum Status { Ok, Postponed, Cancelled };
 }

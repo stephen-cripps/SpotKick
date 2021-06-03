@@ -37,12 +37,12 @@ namespace SpotKick.Application.Services
 
                     throw new HttpRequestException("Error contacting SongKick: " + response.StatusCode);
                 }
+
                 results = JsonConvert.DeserializeObject<Gigs>(await response.Content.ReadAsStringAsync()).ResultsPage;
                 entries.AddRange(results.Results.CalendarEntry);
                 page++;
             } while (results.Page * results.PerPage < results.TotalEntries);
 
-            //TODO: Add Automapper
             return (from calendarEntry
                     in entries
                 let artists = calendarEntry.Reason.TrackedArtist.Select(a => a.DisplayName)
