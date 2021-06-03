@@ -37,6 +37,7 @@ namespace SpotKick.Application.Services
 
                     throw new HttpRequestException("Error contacting SongKick: " + response.StatusCode);
                 }
+
                 results = JsonConvert.DeserializeObject<Gigs>(await response.Content.ReadAsStringAsync()).ResultsPage;
                 entries.AddRange(results.Results.CalendarEntry);
                 page++;
