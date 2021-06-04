@@ -15,9 +15,7 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run: |
-          $VERSION = cat version.txt
-          echo "::set-output name=version::${VERSION}"
+        run:  echo $PSScriptRoot
 
       - name: Checkout
         uses: actions/checkout@v2
