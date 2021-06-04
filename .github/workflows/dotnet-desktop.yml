@@ -17,11 +17,8 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run:  |
-          MAJOR=$(cat VERSION.txt | cut -d . -f 1)
-          MINOR=$(cat VERSION.txt | cut -d . -f 2)
-          PATCH=$(cat VERSION.txt | cut -d . -f 3)
-          VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+        run: |
+          $VERSION = cat VERSION.txt
           echo "::set-output name=version::${VERSION}"
 
       - name: Checkout
@@ -44,8 +41,8 @@ jobs:
         env:
           Github_Token: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: ${{ needs.get_version.outputs.version }} 
-          release_name: ${{ needs.get_version.outputs.version }} 
+          tag_name: ${{ needs.get_version.outputs.version }}
+          release_name: ${{ needs.get_version.outputs.version }}
 
       - uses: csexton/release-asset-action@v2
         with:
