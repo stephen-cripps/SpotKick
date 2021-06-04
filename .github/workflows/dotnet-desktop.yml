@@ -7,19 +7,13 @@ on:
     branches: [master]
 
 env:
-  Version_Path: version.txt
   Project_Path: SpotKick.Desktop/SpotKick.Desktop.csproj
+  Release: v1.0.0
 
 jobs:
   deploy:
     runs-on: windows-latest
     steps:
-      - name: Read ReadVersion
-        id: read_file
-        uses: andstor/file-reader-action@v1
-        with:
-          path: ${{ env.Project_Path}}
-
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -40,8 +34,8 @@ jobs:
         env:
           Github_Token: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: ${{ steps.read_file.outputs.contents  }}
-          release_name: ${{ steps.read_file.outputs.contents  }}
+          tag_name: ${{env.Release}}
+          release_name: ${{env.Release}}
 
       - uses: csexton/release-asset-action@v2
         with:
