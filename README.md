@@ -5,7 +5,4 @@ SpotKick looks at upcoming gigs for the artists you’re tracking in Songkick. T
 - Gigs you are going to
 
 # Running the Program
-- Download the .exe
-- Run the .exe
-- Login
-- Hit Update Playlists
+To run the code, you will need to duplicate the create and App.Config file, matching the App.Config.Template File but with your own Songkick APi key, which can be requested from [https://www.songkick.com/api_key_requests/new](here).
