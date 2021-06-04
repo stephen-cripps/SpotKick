@@ -41,5 +41,5 @@ jobs:
       - uses: csexton/release-asset-action@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          pattern: /SpotKick.Desktop/bin/Release/net5.0-windows/publish/*.exe
+          pattern: /SpotKick.Desktop/bin/Release/net5.0-windows/win-x64/SpotKick.Desktop.exe
           release-url: ${{steps.create_release.outputs.upload_url}}
