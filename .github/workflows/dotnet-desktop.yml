@@ -35,11 +35,11 @@ jobs:
         env:
           Github_Token: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: ${{github.ref}}
-          release_name: ${{github.ref}}
+          tag_name: release $(date +'%Y-%m-%d %h%M')
+          release_name: release $(date +'%Y-%m-%d %h%M')
 
       - uses: csexton/release-asset-action@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          pattern: /SpotKick.Desktop/bin/Release/net5.0-windows/win-x64/SpotKick.Desktop.exe
-          release-url: ${{steps.create_release.outputs.upload_url}}
+          pattern: /SpotKick.Desktop/bin/Release/net5.0-windows/publish/*.exe
+          release-url: ${{steps.create-release.outputs.upload_url}}
