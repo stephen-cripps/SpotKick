@@ -14,33 +14,26 @@ jobs:
   deploy:
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: setup
-        uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v1
 
-      - name: Restore the application
-        run: dotnet restore ${{env.Project_Path}}
+      - run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      - name: Create the app package
-        run: dotnet build ${{ env.Project_Path}} -c Release --no-restore -p:PublishSingleFile=true
+      - run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
 
-      - name: Publish
-        run: dotnet publish ${{env.Project_Path}} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
+      - run: dotnet publish ${{ env.PROJECT_PATH }} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
 
-      - name: Create Release
-        uses: actions/create-release@v1
-        id: create-release
+      - uses: actions/create-release@v1
+        id: create_release
         env:
-          Github_Token: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{env.Release}}
-          release_name: ${{env.Release}}
+          tag_name:  ${{env.Release}}
+          release_name:  ${{env.Release}}
 
-      - name: uploadRelease
-        uses: csexton/release-asset-action@v2
+      - uses: csexton/release-asset-action@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          pattern: /SpotKick.Desktop/bin/Release/net5.0-windows/win-x64/publish/*.exe
-          release-url: ${{steps.create-release.outputs.upload_url}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: SpotKick.Desktop/bin/Release/net5.0-windows/win-x64/publish/*.exe
+          release-url: ${{ steps.create_release.outputs.upload_url }}
