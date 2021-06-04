@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+	<appSettings>
+		<add key="SongkickApiKey" value =""/>
+		<add key="SpotifyClientId" value="73922ae56d3c430e9252485447a7f5ce"/>
+		<add key="SpotifyRedirectUrl" value="http://localhost:4200/authorise/"/>
+	</appSettings>
+</configuration>
