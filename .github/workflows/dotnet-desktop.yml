@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run:  echo $PSScriptRoot
+        run:  dir
 
       - name: Checkout
         uses: actions/checkout@v2
