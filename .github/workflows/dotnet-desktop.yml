@@ -24,10 +24,10 @@ jobs:
         run: dotnet restore ${{env.Project_Path}}
 
       - name: Create the app package
-        run: dotnet build ${{ env.Project_Path}} -c Release --no-restore -p:PublishSingleFile=true
+        run: dotnet build ${{ env.Project_Path}} -c Release 
 
       - name: Publish
-        run: dotnet publish ${{env.Project_Path}} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
+        run: dotnet publish ${{env.Project_Path}} -c Release --self-contained -r win-x64 
 
       - name: Create Release
         uses: actions/create-release@v1
