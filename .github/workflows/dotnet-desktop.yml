@@ -16,7 +16,7 @@ jobs:
       - name: Get version
         id: get_version
         run: |
-          $VERSION = cat SpotKick.Desktop/VERSION.txt
+          $VERSION = cat version.txt
           echo "::set-output name=version::${VERSION}"
 
       - name: Checkout
