@@ -8,7 +8,7 @@ on:
 
 env:
   Project_Path: SpotKick.Desktop/SpotKick.Desktop.csproj
-  Release: v1.0.0
+  Release: v1.0.1
 
 jobs:
   deploy:
@@ -29,7 +29,8 @@ jobs:
       - name: Publish
         run: dotnet publish ${{env.Project_Path}} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
 
-      - uses: actions/create-release@v1
+      - name: Create Release
+        uses: actions/create-release@v1
         id: create-release
         env:
           Github_Token: ${{secrets.GITHUB_TOKEN}}
@@ -37,7 +38,13 @@ jobs:
           tag_name: ${{env.Release}}
           release_name: ${{env.Release}}
 
-      - uses: csexton/release-asset-action@v2
+      - name: test
+        run: |
+         cd /SpotKick.Desktop/bin/Release/net5.0-windows/publish
+         dir
+
+      - name: uploadRelease
+        uses: csexton/release-asset-action@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           pattern: /SpotKick.Desktop/bin/Release/net5.0-windows/publish/*.exe
