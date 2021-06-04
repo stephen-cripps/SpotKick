@@ -7,21 +7,18 @@ on:
     branches: [master]
 
 env:
+  Version_Path: version.txt
   Project_Path: SpotKick.Desktop/SpotKick.Desktop.csproj
 
 jobs:
   deploy:
     runs-on: windows-latest
     steps:
-
-      - name: test
-        run: ls
-
       - name: Read ReadVersion
         id: read_file
         uses: andstor/file-reader-action@v1
         with:
-          path: "version.txt"
+          path: ${{ env.Version_Path}}
 
       - name: Checkout
         uses: actions/checkout@v2
