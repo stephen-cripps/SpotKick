@@ -13,9 +13,11 @@ jobs:
   deploy:
     runs-on: windows-latest
     steps:
-      - name: Get version
-        id: get_version
-        run:  dir
+      - name: Read ReadVersion
+        id: read_file
+        uses: andstor/file-reader-action@v1
+        with:
+          path: "version.txt"
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -37,8 +39,8 @@ jobs:
         env:
           Github_Token: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: ${{ needs.get_version.outputs.version }}
-          release_name: ${{ needs.get_version.outputs.version }}
+          tag_name: ${{ steps.read_file.outputs.contents  }}
+          release_name: ${{ steps.read_file.outputs.contents  }}
 
       - uses: csexton/release-asset-action@v2
         with:
