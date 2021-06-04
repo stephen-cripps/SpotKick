@@ -40,7 +40,7 @@ jobs:
 
       - name: test
         run: |
-         cd /SpotKick.Desktop/bin/Release/net5.0-windows/publish
+         cd ./SpotKick.Desktop/bin/Release/net5.0-windows/publish
          dir
 
       - name: uploadRelease
