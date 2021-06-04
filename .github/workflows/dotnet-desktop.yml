@@ -34,6 +34,9 @@ jobs:
         id: create-release
         env:
           Github_Token: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: ${{github.ref}}
+          release_name: ${{github.ref}}
 
       - uses: csexton/release-asset-action@v2
         with:
