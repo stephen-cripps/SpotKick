@@ -35,7 +35,7 @@ jobs:
       #   env:
       #     Github_Token: ${{secrets.GITHUB_TOKEN}}
 
-      # - uses: csexton/release-asset-actions@v2
+      # - uses: csexton/release-asset-action@v2
       #   with:
       #     github-token: ${{secrets.GITHUB_TOKEN}}
       #     pattern: /SpotKick.Desktop/bin/Release/net5.0-windows/publish/*.exe
