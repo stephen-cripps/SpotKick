@@ -13,6 +13,10 @@ jobs:
   deploy:
     runs-on: windows-latest
     steps:
+
+      - name: test
+        run: ls
+
       - name: Read ReadVersion
         id: read_file
         uses: andstor/file-reader-action@v1
