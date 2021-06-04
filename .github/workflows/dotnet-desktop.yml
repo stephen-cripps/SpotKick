@@ -18,7 +18,7 @@ jobs:
         id: read_file
         uses: andstor/file-reader-action@v1
         with:
-          path: ${{ env.Version_Path}}
+          path: ${{ env.Project_Path}}
 
       - name: Checkout
         uses: actions/checkout@v2
