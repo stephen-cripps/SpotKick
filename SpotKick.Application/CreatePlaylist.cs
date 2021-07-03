@@ -43,7 +43,7 @@ namespace SpotKick.Application
             {
                 var watch = new Stopwatch();
                 watch.Start();
-                var gigs = await songkickService.FindGigs(request.SongKickUsername);
+                var gigs = await songkickService.FindGigsFromCalendar(request.SongKickUsername);
 
                 spotifyService = new SpotifyService(request.SpotifyAccessToken);
 

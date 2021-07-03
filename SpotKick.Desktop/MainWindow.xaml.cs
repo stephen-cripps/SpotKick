@@ -141,6 +141,32 @@ namespace SpotKick.Desktop
         }
 
         /// <summary>
+        /// Runs Export to CSV
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void ExportRun_Click(object sender, RoutedEventArgs e)
+        {
+            ApplicationStatus.Foreground = Brushes.Black;
+            ApplicationStatus.Text = "Running...";
+
+            try
+            {
+                user.SongKickUsername = context.SongKickUsername;
+                userRepo.StoreCurrentUser(user);
+                var command = new CreateCSVExport.Command(context.FolderPath + "/" + context.FileName, context.SongKickUsername);
+                await mediator.Send(command);
+                ApplicationStatus.Text = "File generated";
+            }
+            catch (Exception exception)
+            {
+                SetExceptionMessage(exception);
+            }
+
+   
+        }
+
+        /// <summary>
         /// Launches the browser for a user to auth, returns Access and Refresh Tokens
         /// </summary>
         /// <returns></returns>
@@ -214,6 +240,7 @@ namespace SpotKick.Desktop
             {
                 SpotifyAuthException _ => "An error occurred authenticating the spotify account",
                 SongKickUserNotFoundException _ => "SongKick user not found",
+                CsvWriteException => "Error Saving CSV. Check your folder path is valid",
                 _ => "An Unexpected Error Occurred"
             };
         }
@@ -230,6 +257,5 @@ namespace SpotKick.Desktop
             context.ShowGreeting = user.SpotifyUsername != null && user.SpotifyCredentials.UserIsValid;
             context.SpotifyUsername = user.SpotifyUsername;
         }
-
     }
 }

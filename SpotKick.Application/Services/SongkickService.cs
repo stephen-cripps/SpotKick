@@ -19,7 +19,7 @@ namespace SpotKick.Application.Services
             this.apiKey = apiKey;
         }
 
-        public async Task<List<Gig>> FindGigs(string username)
+        public async Task<List<Gig>> FindGigsFromCalendar(string username)
         {
             var client = new HttpClient();
             var entries = new List<CalendarEntry>();
@@ -45,12 +45,48 @@ namespace SpotKick.Application.Services
 
             return (from calendarEntry
                     in entries
-                let artists = calendarEntry.Reason.TrackedArtist.Select(a => a.DisplayName)
+                let displayName = calendarEntry.Event.DisplayName
+                    let artists = calendarEntry.Reason.TrackedArtist.Select(a => a.DisplayName)
                 let date = calendarEntry.Event.Start.Date
                 let location = calendarEntry.Event.Location.City
                 let status = calendarEntry.Event.Status
                 let attendance = calendarEntry.Reason.Attendance
-                select new Gig(artists, date, location, status, attendance)).ToList();
+                select new Gig(artists, date, location, status, attendance, displayName)).ToList();
+        }
+
+        public async Task<List<Gig>> FindGigsFromEvents(string username)
+        {
+            var client = new HttpClient();
+            var entries = new List<Event>();
+            ResultsPage results;
+            var page = 1;
+
+            do
+            {
+                var uri = $"https://api.songkick.com/api/3.0/users/{username}/events.json?reason=tracked_artist&apikey={apiKey}&page={page}&attendance=all";
+                var response = await client.GetAsync(uri);
+                if (!response.IsSuccessStatusCode)
+                {
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                        throw new SongKickUserNotFoundException(username);
+
+                    throw new HttpRequestException("Error contacting SongKick: " + response.StatusCode);
+                }
+
+                results = JsonConvert.DeserializeObject<Gigs>(await response.Content.ReadAsStringAsync()).ResultsPage;
+                entries.AddRange(results.Results.Event);
+                page++;
+            } while (results.Page * results.PerPage < results.TotalEntries);
+
+
+            return (from songKickEvent
+                    in entries
+                    let displayName = songKickEvent.DisplayName
+                    let artists = songKickEvent.Performance.Select(a => a.DisplayName)
+                    let date = songKickEvent.Start.Date
+                    let location = songKickEvent.Location.City
+                    let status = songKickEvent.Status
+                    select new Gig(artists, date, location, status, null, displayName)).ToList();
         }
     }
 }

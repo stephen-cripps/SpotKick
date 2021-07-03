@@ -2,7 +2,7 @@
 
 namespace SpotKick.Application.ResponseModels.SongkickResults
 {
-    public  class Gigs
+    public class Gigs
     {
         public ResultsPage ResultsPage { get; set; }
     }
@@ -18,12 +18,13 @@ namespace SpotKick.Application.ResponseModels.SongkickResults
         public int TotalEntries { get; set; }
     }
 
-    public class Results
+    public class Results // Results return either array of calendar enrtries or array of Events, depending on the endpoint called.
     {
+        public Event[] Event { get; set; }
         public CalendarEntry[] CalendarEntry { get; set; }
     }
 
-    public  class CalendarEntry
+    public class CalendarEntry
     {
         public Reason Reason { get; set; }
 
@@ -45,11 +46,21 @@ namespace SpotKick.Application.ResponseModels.SongkickResults
 
     public class Event
     {
+        public string DisplayName { get; set; }
+
         public string Status { get; set; }
 
         public Start Start { get; set; }
 
         public Location Location { get; set; }
+
+        public Performance[] Performance { get; set; }
+    }
+
+    public class Performance
+    {
+        public string DisplayName { get; set; }
+        public string Billing { get; set; }
     }
 
     public class Start
