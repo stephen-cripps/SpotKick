@@ -24,6 +24,12 @@
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
 			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
+			<RowDefinition Height ="auto"/>
 		</Grid.RowDefinitions>
 		<TextBlock Name="Greeting" Text= "{Binding SpotifyUsername, StringFormat={}Hello {0}!}"
 		           Grid.Row="0" Grid.Column="1" Margin="0,0,0,20">
@@ -34,7 +40,7 @@
 						<DataTrigger Binding="{Binding ShowGreeting}" Value="True">
 							<Setter Property="Visibility" Value="Visible"/>
 						</DataTrigger>
-					</Style.Triggers>                    
+					</Style.Triggers>
 				</Style>
 			</TextBlock.Style>
 		</TextBlock>
@@ -58,7 +64,19 @@
 		         Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,30"/>
 		<Button x:Name="LoginRun" Content="{Binding ButtonText}"
 		        Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Click="LoginRun_Click" />
+		<TextBlock  Text="Export Plans" 
+		            Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,50,0,5" />
+		<TextBlock  Text="Folder Path" 
+		            Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,5" />
+		<TextBox x:Name="ExportPath" TextWrapping="NoWrap" Text="{Binding FolderPath}"
+		         Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,15"/>
+		<TextBlock  Text="File Name" 
+		            Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,5" />
+		<TextBox x:Name="FileName" TextWrapping="NoWrap" Text="{Binding FileName}"
+		         Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,15"/>
+		<Button x:Name="ExportRun" Content="Export Plans"
+		        Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2"  Margin="0,0,0,30" Click="ExportRun_Click"/>
 		<TextBlock x:Name="ApplicationStatus" Text="" TextWrapping="NoWrap" FontSize="9"
-		         Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,30"/>
+		         Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
 	</Grid>
 </Window>

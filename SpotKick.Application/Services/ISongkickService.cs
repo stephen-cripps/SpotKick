@@ -7,10 +7,18 @@ namespace SpotKick.Application.Services
     public interface ISongkickService
     {
         /// <summary>
-        /// Finds all upcoming gigs for a given user. Currently only returns tracked artists.
+        /// Finds all gig's on a user's calendar. Currently only returns tracked artists. Tied to a user's location.
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        Task<List<Gig>> FindGigs(string username);
+        Task<List<Gig>> FindGigsFromCalendar(string username);
+
+        /// <summary>
+        /// Finds all gigs in the going or attending list for a given user. Returns all artists, Not tied to a user's location.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        Task<List<Gig>> FindGigsFromEvents(string username);
+
     }
 }

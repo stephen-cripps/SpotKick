@@ -1,4 +1,5 @@
 ﻿using SpotKick.Desktop.Context;
+using System;
 
 namespace SpotKick.Desktop
 {
@@ -39,5 +40,9 @@ namespace SpotKick.Desktop
                 OnPropertyChanged(nameof(spotifyUsername));
             }
         }
-    }
+
+        public string FolderPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        public string FileName { get; set; }
+
+}
 }
