@@ -65,7 +65,7 @@ namespace SpotKick.Desktop
         /// Checks stored user data. Performs token refresh if required.
         /// </summary>
         /// <returns></returns>
-        private async Task InitialiseUser()
+        async Task InitialiseUser()
         {
             var previousUser = userRepo.GetPreviousUser();
 
@@ -83,7 +83,7 @@ namespace SpotKick.Desktop
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void LoginRun_Click(object sender, RoutedEventArgs e)
+        async void LoginRun_Click(object sender, RoutedEventArgs e)
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "";
@@ -145,7 +145,7 @@ namespace SpotKick.Desktop
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void ExportRun_Click(object sender, RoutedEventArgs e)
+        async void ExportRun_Click(object sender, RoutedEventArgs e)
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "Running...";
@@ -250,8 +250,7 @@ namespace SpotKick.Desktop
         /// </summary>
         void UpdateContext()
         {
-            if (context.SongKickUsername == null)
-                context.SongKickUsername = user.SongKickUsername;
+            context.SongKickUsername ??= user.SongKickUsername;
 
             context.ButtonText = user.SpotifyCredentials.UserIsValid ? "Update Playlists" : "Spotify Login";
             context.ShowGreeting = user.SpotifyUsername != null && user.SpotifyCredentials.UserIsValid;

@@ -17,7 +17,7 @@ namespace SpotKick.Desktop.SpotifyAuth
     public static class LocalServerCodeReceiver
     {
         /// <summary>Close HTML tag to return the browser so it will close itself.</summary>
-        private const string ClosePageResponse =
+        const string ClosePageResponse =
             @"<html>
               <head><title>OAuth 2.0 Authentication Token Received</title></head>
               <body>

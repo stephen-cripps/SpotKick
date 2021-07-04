@@ -18,9 +18,8 @@ namespace SpotKick.Application.ResponseModels.SongkickResults
         public int TotalEntries { get; set; }
     }
 
-    public class Results // Results return either array of calendar enrtries or array of Events, depending on the endpoint called.
-    {
-        public Event[] Event { get; set; }
+    public class Results
+    {           
         public CalendarEntry[] CalendarEntry { get; set; }
     }
 

@@ -124,6 +124,7 @@ namespace SpotKick.Application.Services
 
         public async Task UpdatePlaylist(string id, IReadOnlyCollection<string> tracks)
         {
+            await ClearPlaylist(id);
             for (var i = 0; i < tracks.Count; i += 100)
             {
                 var items = tracks.Skip(i).Take(100).Select(t => "spotify:track:" + t);
@@ -131,7 +132,7 @@ namespace SpotKick.Application.Services
                 var request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri($"https://api.spotify.com/v1/playlists/{id}/tracks"),
-                    Method = HttpMethod.Put,
+                    Method = HttpMethod.Post,
                     Content = new StringContent(JsonConvert.SerializeObject(new { uris = items }))
                 };
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -150,7 +151,34 @@ namespace SpotKick.Application.Services
                     else
                         throw new HttpRequestException($"Error updating playlist {id}: {response.StatusCode}");
                 }
+
             }
+        }
+
+        async Task ClearPlaylist(string id)
+        {
+                var request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri($"https://api.spotify.com/v1/playlists/{id}/tracks"),
+                    Method = HttpMethod.Put,
+                    Content = new StringContent(JsonConvert.SerializeObject(new { uris = new List<string>() }))
+                };
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                while (true)
+                {
+                    var response = await spotifyClient.SendAsync(request);
+
+                    if (response.IsSuccessStatusCode)
+                        break;
+
+                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        Thread.Sleep(response.Headers.RetryAfter.Delta.Value.Milliseconds);
+                    }
+                    else
+                        throw new HttpRequestException($"Error clearing playlist {id}: {response.StatusCode}");
+                }
         }
 
         public async Task<string> GetUsername() => (await GetCurrentUser()).Username;

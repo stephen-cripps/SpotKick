@@ -8,9 +8,9 @@ namespace SpotKick.Application.Models
     {
         readonly Status status;
 
-        public Gig(IEnumerable<string> trackedArtists, DateTimeOffset date, string location, string status, string attendance, string displayName)
+        public Gig(IEnumerable<Artist> trackedArtists, DateTimeOffset date, string location, string status, string attendance, string displayName)
         {
-            TrackedArtists = trackedArtists;
+            Artists = trackedArtists;
             Date = date;
             Location = location;
             DisplayName = displayName;
@@ -26,7 +26,7 @@ namespace SpotKick.Application.Models
         }
         public string DisplayName { get; }
 
-        public IEnumerable<string> TrackedArtists { get; }
+        public IEnumerable<Artist> Artists { get; }
 
         public DateTimeOffset Date { get; }
 
@@ -36,6 +36,7 @@ namespace SpotKick.Application.Models
 
         public Attendance Attendance { get; }
     }
+
 
     public enum Attendance { NotGoing, Interested, Going }
 

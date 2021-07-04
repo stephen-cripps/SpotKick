@@ -44,7 +44,7 @@ namespace SpotKick.Application
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
 
-                var gigs = await songkickService.FindGigsFromEvents(request.SongKickUsername);
+                var gigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.attendance);
 
                 string csv = GenerateCSV(gigs);
 
@@ -60,15 +60,12 @@ namespace SpotKick.Application
                 return Unit.Value;
             }
 
-            public string GenerateCSV(IEnumerable<Gig> items)
+            public string GenerateCSV(IEnumerable<Gig> gigs)
             {
                 var output = "";
-                var delimiter = ',';
+                const char delimiter = ',';
 
-                var properties = typeof(Gig).GetProperties()
-                    .Where(p => p.Name == "DisplayName"
-                    || p.Name == "Location"
-                    || p.Name == "Status");
+                var properties = typeof(Gig).GetProperties();
 
                 using var sw = new StringWriter();
 
@@ -78,15 +75,28 @@ namespace SpotKick.Application
 
                 sw.WriteLine(header);
 
-                foreach (var item in items)
+                foreach (var gig in gigs)
                 {
                     var row = properties
-                    .Select(n => n.GetValue(item, null))
-                    .Select(n => n == null ? "null" : n.ToString().Replace(',', ';'))
-                        .Aggregate((a, b) => a + delimiter + b); sw.WriteLine(row);
+                    .Select(n => GetCellValue(n, gig))
+                        .Aggregate((a, b) => a + delimiter + b);
+
+                    sw.WriteLine(row);
                 }
                 output = sw.ToString();
                 return output;
+            }
+
+            public string GetCellValue(System.Reflection.PropertyInfo property, Gig gig)
+            {
+                var propertyValue = property.GetValue(gig, null);
+                var cellValue = property.Name switch
+                {
+                    "Artists" => string.Join("; ", (propertyValue as IEnumerable<Artist>).Select(a => a.DisplayName)),
+                    "Date" => ((DateTimeOffset)propertyValue).ToString("D"),
+                    _ => propertyValue.ToString()
+                };
+                return cellValue.Replace(",", " ");
             }
         }
     }
