@@ -23,7 +23,7 @@ namespace SpotKick.Desktop
             serviceProvider = services.BuildServiceProvider();
         }
 
-        private void ConfigureServices(ServiceCollection services)
+        void ConfigureServices(ServiceCollection services)
         {
 
             services
@@ -34,7 +34,8 @@ namespace SpotKick.Desktop
                 .AddMediatR(typeof(CreatePlaylist))
                 .AddSingleton<MainWindow>();
         }
-        private void OnStartup(object sender, StartupEventArgs e)
+
+        void OnStartup(object sender, StartupEventArgs e)
         {
             try
             {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using SpotKick.Application.Exceptions;
 using SpotKick.Application.Models;
 using SpotKick.Application.ResponseModels.SongkickResults;
 using SpotKick.Application.Services;
@@ -31,8 +32,10 @@ namespace SpotKick.Application
         public class Handler : IRequestHandler<Command>
         {
             readonly ISongkickService songkickService;
-            readonly Dictionary<string, IEnumerable<string>> trackedArtists = new Dictionary<string, IEnumerable<string>>();
             ISpotifyService spotifyService;
+            Dictionary<string, IEnumerable<string>> topTrackCache = new Dictionary<string, IEnumerable<string>>();
+            List<Gig> upcomingGigs;
+            List<Gig> attendingGigs;
 
             public Handler(ISongkickService songkickService)
             {
@@ -41,51 +44,39 @@ namespace SpotKick.Application
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
-                var watch = new Stopwatch();
-                watch.Start();
-                var upcomingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.tracked_artist);
-                var attendingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.attendance);
+                upcomingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.tracked_artist);
+                attendingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.attendance);
 
                 spotifyService = new SpotifyService(request.SpotifyAccessToken);
 
-                //await CreatePlaylist(upcomingGigs
-                //    .Where(gig => gig.Date < DateTimeOffset.Now.AddDays(30))
-                //    .Where(gig => gig.Status == Status.Ok)
-                //    .SelectMany(gig => gig.Artists)
-                //    .ToHashSet(), "SpotKick - Next 30 days.");
+                await CreatePlaylist(upcomingGigs
+                    .Where(gig => gig.Date < DateTimeOffset.Now.AddDays(30))
+                    .Where(gig => gig.Status == Status.Ok)
+                    .SelectMany(gig => gig.Artists)
+                    .ToHashSet(), "SpotKick - Next 30 days.");
 
-                //await CreatePlaylist(upcomingGigs
-                //    .Where(gig => gig.Attendance != Attendance.NotGoing)
-                //    .Where(gig => gig.Status != Status.Cancelled)
-                //    .SelectMany(gig => gig.Artists)
-                //    .ToHashSet(), "SpotKick - Interested & Going.");
+                await CreatePlaylist(attendingGigs
+                    .Where(gig => gig.Status != Status.Cancelled)
+                    .SelectMany(gig => gig.Artists)
+                    .ToHashSet(), "SpotKick - Interested & Going.");
 
-                //await CreatePlaylist(upcomingGigs
-                //    .Where(gig => gig.Attendance == Attendance.Going)
-                //    .Where(gig => gig.Status != Status.Cancelled)
-                //    .SelectMany(gig => gig.Artists)
-                //    .ToHashSet(), "SpotKick - Just Going.");
-
-                watch.Stop();
-                var time = watch.ElapsedMilliseconds;
+                await CreatePlaylist(attendingGigs
+                    .Where(gig => gig.Attendance == Attendance.Going)
+                    .Where(gig => gig.Status != Status.Cancelled)
+                    .SelectMany(gig => gig.Artists)
+                    .ToHashSet(), "SpotKick - Just Going.");
 
                 return Unit.Value;
             }
 
 
-            async Task CreatePlaylist(IEnumerable<string> artists, string playlistName)
+            async Task CreatePlaylist(IEnumerable<Artist> artists, string playlistName)
             {
                 var tracks = new List<string>();
-                var tasks = artists.Select(artist => Task.Run(async () =>
+                foreach (var artist in artists)
                 {
-                    var artistTracks = await GetArtistTracks(artist);
-                    lock (tracks)
-                        if (artistTracks != null)
-                            tracks.AddRange(artistTracks);
-
-                })).ToArray();
-
-                Task.WaitAll(tasks, TimeSpan.FromMinutes(5));
+                    tracks.AddRange(await GetArtistTracks(artist));
+                }
 
                 var playlistId = await spotifyService.GetOrCreatePlaylist(playlistName);
 
@@ -93,56 +84,34 @@ namespace SpotKick.Application
                 {
                     await spotifyService.UpdatePlaylist(playlistId, tracks.ToList());
                 }
-                catch
+                catch(Exception e)
                 {
                     //TODO: Display Error info to user. 
                 }
             }
 
-            async Task<IEnumerable<string>> GetArtistTracks(string artistName)
+            async Task<IEnumerable<string>> GetArtistTracks(Artist artist)
             {
-                var artistId = "";
+                var tracks = new List<string>();
                 try
                 {
-                    lock (trackedArtists)
-                        if (trackedArtists.TryGetValue(artistName, out var trackIds))
-                            return trackIds;
+                    if (topTrackCache.TryGetValue(artist.DisplayName, out var trackIds))
+                        return trackIds;
 
-                    artistId = await spotifyService.FindArtistId(artistName);
+                    var artistId = await spotifyService.FindArtistId(artist.DisplayName);
 
-                    if (artistId == null)
-                        throw new Exception("Artist not found");
+                    if (artistId != null)
+                        tracks = (await spotifyService.GetTopTracks(artistId)).ToList();
+                    else
+                        throw new ArtistNotFoundException(artist.DisplayName);
                 }
                 catch (Exception e)
                 {
-                    UpdateArtistDictionary(artistName, null);
-                    return null;
-
-                    //TODO: Display Error info to user. 
+                    //TODO: Inform user if artist wasn't found tracks are null or there has been an error
                 }
 
-                try
-                {
-                    var tracks = (await spotifyService.GetTopTracks(artistId)).ToList();
-                    UpdateArtistDictionary(artistName, null);
-
-                    //TODO: inform user if tracks are null
-                    return tracks;
-                }
-                catch (Exception e)
-                {
-                    UpdateArtistDictionary(artistName, null);
-                    return null;
-
-                    //TODO: Display Error info to user
-                }
-            }
-
-
-            void UpdateArtistDictionary(string artistName, IEnumerable<string> tracks)
-            {
-                lock (trackedArtists)
-                    trackedArtists[artistName] = tracks;
+                topTrackCache[artist.DisplayName] = tracks;
+                return tracks;
             }
         }
     }

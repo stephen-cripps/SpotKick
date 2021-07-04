@@ -49,7 +49,7 @@ namespace SpotKick.Desktop.SpotifyAuth
         /// Generate a cryptographically secure array of bytes with a fixed length
         /// </summary>
         /// <returns></returns>
-        private static byte[] GenerateRandomBytes()
+        static byte[] GenerateRandomBytes()
         {
             using var provider = new RNGCryptoServiceProvider();
             var byteArray = new byte[ByteLength];
