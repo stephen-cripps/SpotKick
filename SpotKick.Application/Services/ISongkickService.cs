@@ -11,14 +11,6 @@ namespace SpotKick.Application.Services
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        Task<List<Gig>> FindGigsFromCalendar(string username);
-
-        /// <summary>
-        /// Finds all gigs in the going or attending list for a given user. Returns all artists, Not tied to a user's location.
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
-        Task<List<Gig>> FindGigsFromEvents(string username);
-
+        Task<List<Gig>> FindGigs(string username, Reason reason);
     }
 }

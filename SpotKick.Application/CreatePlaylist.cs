@@ -43,27 +43,28 @@ namespace SpotKick.Application
             {
                 var watch = new Stopwatch();
                 watch.Start();
-                var gigs = await songkickService.FindGigsFromCalendar(request.SongKickUsername);
+                var upcomingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.tracked_artist);
+                var attendingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.attendance);
 
                 spotifyService = new SpotifyService(request.SpotifyAccessToken);
 
-                await CreatePlaylist(gigs
-                    .Where(gig => gig.Date < DateTimeOffset.Now.AddDays(30))
-                    .Where(gig => gig.Status == Status.Ok)
-                    .SelectMany(gig => gig.TrackedArtists)
-                    .ToHashSet(), "SpotKick - Next 30 days.");
+                //await CreatePlaylist(upcomingGigs
+                //    .Where(gig => gig.Date < DateTimeOffset.Now.AddDays(30))
+                //    .Where(gig => gig.Status == Status.Ok)
+                //    .SelectMany(gig => gig.Artists)
+                //    .ToHashSet(), "SpotKick - Next 30 days.");
 
-                await CreatePlaylist(gigs
-                    .Where(gig => gig.Attendance != Attendance.NotGoing)
-                    .Where(gig => gig.Status != Status.Cancelled)
-                    .SelectMany(gig => gig.TrackedArtists)
-                    .ToHashSet(), "SpotKick - Interested & Going.");
+                //await CreatePlaylist(upcomingGigs
+                //    .Where(gig => gig.Attendance != Attendance.NotGoing)
+                //    .Where(gig => gig.Status != Status.Cancelled)
+                //    .SelectMany(gig => gig.Artists)
+                //    .ToHashSet(), "SpotKick - Interested & Going.");
 
-                await CreatePlaylist(gigs
-                    .Where(gig => gig.Attendance == Attendance.Going)
-                    .Where(gig => gig.Status != Status.Cancelled)
-                    .SelectMany(gig => gig.TrackedArtists)
-                    .ToHashSet(), "SpotKick - Just Going.");
+                //await CreatePlaylist(upcomingGigs
+                //    .Where(gig => gig.Attendance == Attendance.Going)
+                //    .Where(gig => gig.Status != Status.Cancelled)
+                //    .SelectMany(gig => gig.Artists)
+                //    .ToHashSet(), "SpotKick - Just Going.");
 
                 watch.Stop();
                 var time = watch.ElapsedMilliseconds;
