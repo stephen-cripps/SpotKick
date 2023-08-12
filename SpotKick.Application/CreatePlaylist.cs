@@ -34,8 +34,6 @@ namespace SpotKick.Application
             private readonly ISongkickService songkickService;
             private ISpotifyService spotifyService;
             private readonly Dictionary<string, IEnumerable<string>> topTrackCache = new();
-            private List<Gig> upcomingGigs;
-            private List<Gig> attendingGigs;
 
             public Handler(ISongkickService songkickService)
             {
@@ -44,21 +42,27 @@ namespace SpotKick.Application
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
-                upcomingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.tracked_artist);
-                attendingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.attendance);
-
+                var attendingGigs = await songkickService.FindUserGigs(request.SongKickUsername);
+                var mancGigs = await songkickService.FindLocalGigs();
+                
                 spotifyService = new SpotifyService(request.SpotifyAccessToken);
                 
-                await CreatePlaylist(attendingGigs
-                    .Where(gig => gig.Status != Status.Cancelled)
-                    .SelectMany(gig => gig.Artists)
-                    .ToHashSet(), "SpotKick - Interested & Going.");
+                // await CreatePlaylist(attendingGigs
+                //     .Where(gig => gig.Status != Status.Cancelled)
+                //     .SelectMany(gig => gig.Artists)
+                //     .ToHashSet(), "SpotKick - Interested & Going.");
 
                 await CreatePlaylist(attendingGigs
                     .Where(gig => gig.Attendance == Attendance.Going)
                     .Where(gig => gig.Status != Status.Cancelled)
                     .SelectMany(gig => gig.Artists)
                     .ToHashSet(), "SpotKick - Just Going.");
+                
+                await CreatePlaylist(mancGigs
+                    .Where(gig => gig.Status != Status.Cancelled)
+                    .SelectMany(gig => gig.Artists)
+                    .ToHashSet(), "SpotKick - Manchester, Next 7 Days.");
+                
 
                 return Unit.Value;
             }

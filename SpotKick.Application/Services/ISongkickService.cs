@@ -11,6 +11,8 @@ namespace SpotKick.Application.Services
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        Task<List<Gig>> FindGigs(string username, Reason reason);
+        Task<List<Gig>> FindUserGigs(string username);
+        
+        Task<List<Gig>> FindLocalGigs();
     }
 }

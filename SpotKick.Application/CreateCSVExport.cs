@@ -42,7 +42,7 @@ namespace SpotKick.Application
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
 
-                var gigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.attendance);
+                var gigs = await songkickService.FindUserGigs(request.SongKickUsername);
 
                 string csv = GenerateCSV(gigs);
 
