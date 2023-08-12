@@ -25,19 +25,22 @@ namespace SpotKick.Application.SpotifyAuth
             redirectUrl = configuration["SpotifyRedirectUrl"]; 
         }
         
-        public async Task<SpotifyCredentials> GetCredentials()
+        public async Task<SpotifyCredentials> GetCredentialsAsync()
         {
             if (credentials == null)
-            {
                 await LogIn();
-            }
 
             if (!credentials.UserIsValid)
                 await RefreshAccessToken(credentials.RefreshToken);
             
             return credentials;
         }
-        
+
+        public SpotifyCredentials GetCredentials()
+        {
+            return credentials;
+        }
+
         private async Task LogIn()
         {
             var verifier = new CodeVerifier();

@@ -50,10 +50,11 @@ namespace SpotKick.Desktop
             userRepo.StoreCurrentUser(user);
             try
             {
-                if (user.SpotifyCredentials == null)
+                if (user.SpotifyCredentials.AccessToken == null)
                 {
                     ApplicationStatus.Text = "logging In...";
-                    user.SpotifyCredentials = await spotifyAuthService.GetCredentials();
+                    user.SpotifyCredentials = await spotifyAuthService.GetCredentialsAsync();
+                    user.SpotifyUsername = await spotifyService.GetUsername();
                     UpdateContext();
                     ApplicationStatus.Text = "";
                 }
@@ -119,8 +120,8 @@ namespace SpotKick.Desktop
         {
             context.SongKickUsername ??= user.SongKickUsername;
 
-            context.ButtonText = user.SpotifyCredentials.UserIsValid ? "Update Playlists" : "Spotify Login";
-            context.ShowGreeting = user.SpotifyUsername != null && user.SpotifyCredentials.UserIsValid;
+            context.ButtonText = user.SpotifyUsername != null ? "Update Playlists" : "Spotify Login";
+            context.ShowGreeting = user.SpotifyUsername != null;
             context.SpotifyUsername = user.SpotifyUsername;
         }
     }

@@ -6,29 +6,42 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpotKick.Application.ResponseModels.SpotifyResults;
+using SpotKick.Application.SpotifyAuth;
 
 namespace SpotKick.Application.Services
 {
     public class SpotifyService : ISpotifyService
     {
-        readonly HttpClient spotifyClient;
-
-        public SpotifyService(string authToken)
+        private readonly ILogger<SpotifyService> logger;
+        private readonly ISpotifyAuthService authService;
+        private HttpClient SpotifyClient => BuildClient();
+        
+        public SpotifyService(ILogger<SpotifyService> logger, ISpotifyAuthService authService)
         {
-            spotifyClient = new HttpClient();
-
-            spotifyClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+            this.logger = logger;
+            this.authService = authService;
         }
+
+        private HttpClient BuildClient()
+        {
+            var token = authService.GetCredentials().AccessToken;
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return client;
+        }
+        
 
         public async Task<string> FindArtistId(string name)
         {
             var uri = new Uri($"https://api.spotify.com/v1/search?q={name}&type=artist");
+            logger.LogInformation("Finding artist Id for {Name}", name);
 
             while (true)
             {
-                var response = await spotifyClient.GetAsync(uri);
+                var response = await SpotifyClient.GetAsync(uri);
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
@@ -51,10 +64,12 @@ namespace SpotKick.Application.Services
 
         public async Task<IEnumerable<string>> GetTopTracks(string id)
         {
+            logger.LogInformation("Finding top tracks for {Id}", id);
+
             var uri = new Uri($"https://api.spotify.com/v1/artists/{id}/top-tracks?country=from_token");
             while (true)
             {
-                var response = await spotifyClient.GetAsync(uri);
+                var response = await SpotifyClient.GetAsync(uri);
 
                 if (response.IsSuccessStatusCode) return JsonConvert.DeserializeObject<TopTracks>(await response.Content.ReadAsStringAsync()).Tracks.Select(t => t.Id);
 
@@ -69,10 +84,12 @@ namespace SpotKick.Application.Services
 
         public async Task<string> GetOrCreatePlaylist(string name)
         {
+            logger.LogInformation("Get or Creating playlist {Name}", name);
+
             var uri = new Uri($"https://api.spotify.com/v1/me/playlists");
             while (true)
             {
-                var response = await spotifyClient.GetAsync(uri);
+                var response = await SpotifyClient.GetAsync(uri);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -107,7 +124,7 @@ namespace SpotKick.Application.Services
 
             while (true)
             {
-                var response = await spotifyClient.SendAsync(request);
+                var response = await SpotifyClient.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
                     return JsonConvert.DeserializeObject<ResponseModels.SpotifyResults.CreatePlaylist>(await response.Content.ReadAsStringAsync()).Id;
@@ -123,6 +140,8 @@ namespace SpotKick.Application.Services
 
         public async Task UpdatePlaylist(string id, IReadOnlyCollection<string> tracks)
         {
+            logger.LogInformation("Updating playlist {Id}", id);
+
             await ClearPlaylist(id);
             for (var i = 0; i < tracks.Count; i += 100)
             {
@@ -138,7 +157,7 @@ namespace SpotKick.Application.Services
 
                 while (true)
                 {
-                    var response = await spotifyClient.SendAsync(request);
+                    var response = await SpotifyClient.SendAsync(request);
 
                     if (response.IsSuccessStatusCode)
                         break;
@@ -166,7 +185,7 @@ namespace SpotKick.Application.Services
 
                 while (true)
                 {
-                    var response = await spotifyClient.SendAsync(request);
+                    var response = await SpotifyClient.SendAsync(request);
 
                     if (response.IsSuccessStatusCode)
                         break;
@@ -186,7 +205,7 @@ namespace SpotKick.Application.Services
         {
             while (true)
             {
-                var response = await spotifyClient.GetAsync("https://api.spotify.com/v1/me");
+                var response = await SpotifyClient.GetAsync("https://api.spotify.com/v1/me");
 
                 if (response.IsSuccessStatusCode)
                     return JsonConvert.DeserializeObject<CurrentUser>(await response.Content.ReadAsStringAsync());
