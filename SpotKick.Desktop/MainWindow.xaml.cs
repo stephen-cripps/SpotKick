@@ -6,7 +6,7 @@ using System.Windows.Threading;
 using MediatR;
 using SpotKick.Application;
 using SpotKick.Application.Exceptions;
-using SpotKick.Desktop.SpotifyAuth;
+using SpotKick.Application.SpotifyAuth;
 using SpotKick.Desktop.UserRepository;
 
 

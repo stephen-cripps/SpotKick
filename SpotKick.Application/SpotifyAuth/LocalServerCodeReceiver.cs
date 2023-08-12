@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SpotKick.Application.Exceptions;
 
-namespace SpotKick.Desktop.SpotifyAuth
+namespace SpotKick.Application.SpotifyAuth
 {
     /// <summary>
     /// OAuth 2.0 verification code receiver that runs a local server on a free port and waits for a call with the 

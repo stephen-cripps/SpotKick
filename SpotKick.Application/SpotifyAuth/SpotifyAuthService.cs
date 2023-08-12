@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SpotKick.Application.Exceptions;
-using ConfigurationManager = System.Configuration.ConfigurationManager;
 
-namespace SpotKick.Desktop.SpotifyAuth
+namespace SpotKick.Application.SpotifyAuth
 {
 
     /// <summary>

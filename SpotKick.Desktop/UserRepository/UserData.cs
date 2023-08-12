@@ -1,4 +1,4 @@
-﻿using SpotKick.Desktop.SpotifyAuth;
+﻿using SpotKick.Application.SpotifyAuth;
 
 namespace SpotKick.Desktop.UserRepository
 {

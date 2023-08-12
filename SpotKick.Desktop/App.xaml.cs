@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotKick.Application;
 using SpotKick.Application.Services;
-using SpotKick.Desktop.SpotifyAuth;
+using SpotKick.Application.SpotifyAuth;
 using SpotKick.Desktop.UserRepository;
 
 namespace SpotKick.Desktop

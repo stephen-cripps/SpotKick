@@ -2,7 +2,7 @@
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace SpotKick.Desktop.SpotifyAuth
+namespace SpotKick.Application.SpotifyAuth
 {
     public class CodeVerifier
     {

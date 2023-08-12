@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace SpotKick.Desktop.SpotifyAuth
+namespace SpotKick.Application.SpotifyAuth
 {
     public class SpotifyCredentials
     {

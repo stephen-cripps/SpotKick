@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace SpotKick.Desktop.SpotifyAuth
+namespace SpotKick.Application.SpotifyAuth
 {
     public interface ISpotifyAuthService
     {
