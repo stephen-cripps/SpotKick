@@ -1,6 +1,6 @@
 ﻿using SpotKick.Application.SpotifyAuth;
 
-namespace SpotKick.Desktop.UserRepository
+namespace SpotKick.Application.UserRepository
 {
     public class UserData
     {

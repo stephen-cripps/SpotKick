@@ -19,12 +19,10 @@ namespace SpotKick.Application
     {
         public class Command : IRequest
         {
-            public string SpotifyAccessToken { get; }
             public string SongKickUsername { get; }
 
-            public Command(string spotifyAccessToken, string songKickUsername)
+            public Command(string songKickUsername)
             {
-                SpotifyAccessToken = spotifyAccessToken;
                 SongKickUsername = songKickUsername;
             }
         }
@@ -32,20 +30,19 @@ namespace SpotKick.Application
         public class Handler : IRequestHandler<Command>
         {
             private readonly ISongkickService songkickService;
-            private ISpotifyService spotifyService;
+            private readonly ISpotifyService spotifyService;
             private readonly Dictionary<string, IEnumerable<string>> topTrackCache = new();
 
-            public Handler(ISongkickService songkickService)
+            public Handler(ISongkickService songkickService, ISpotifyService spotifyService)
             {
                 this.songkickService = songkickService;
+                this.spotifyService = spotifyService;
             }
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
                 var attendingGigs = await songkickService.FindUserGigs(request.SongKickUsername);
                 var mancGigs = await songkickService.FindLocalGigs();
-                
-                spotifyService = new SpotifyService(request.SpotifyAccessToken);
                 
                 // await CreatePlaylist(attendingGigs
                 //     .Where(gig => gig.Status != Status.Cancelled)
@@ -58,10 +55,10 @@ namespace SpotKick.Application
                     .SelectMany(gig => gig.Artists)
                     .ToHashSet(), "SpotKick - Just Going.");
                 
-                await CreatePlaylist(mancGigs
-                    .Where(gig => gig.Status != Status.Cancelled)
-                    .SelectMany(gig => gig.Artists)
-                    .ToHashSet(), "SpotKick - Manchester, Next 7 Days.");
+                // await CreatePlaylist(mancGigs
+                //     .Where(gig => gig.Status != Status.Cancelled)
+                //     .SelectMany(gig => gig.Artists)
+                //     .ToHashSet(), "SpotKick - Manchester, Next 7 Days.");
                 
 
                 return Unit.Value;

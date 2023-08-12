@@ -4,8 +4,6 @@ namespace SpotKick.Application.SpotifyAuth
 {
     public interface ISpotifyAuthService
     {
-        Task<SpotifyCredentials> LogIn();
-
-        Task<SpotifyCredentials> RefreshAccessToken(string refreshToken);
+        Task<SpotifyCredentials> GetCredentials();
     }
 }

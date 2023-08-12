@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Xml.Serialization;
 
-namespace SpotKick.Desktop.UserRepository
+namespace SpotKick.Application.UserRepository
 {
     public class UserRepo : IUserRepo
     {

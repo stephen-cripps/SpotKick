@@ -17,14 +17,28 @@ namespace SpotKick.Application.SpotifyAuth
     {
         private readonly string clientId;
         private readonly string redirectUrl;
-
+        private SpotifyCredentials credentials;
+        
         public SpotifyAuthService(IConfiguration configuration)
         {
             clientId = configuration["SpotifyClientId"];
-            redirectUrl = configuration["SpotifyRedirectUrl"];
+            redirectUrl = configuration["SpotifyRedirectUrl"]; 
         }
+        
+        public async Task<SpotifyCredentials> GetCredentials()
+        {
+            if (credentials == null)
+            {
+                await LogIn();
+            }
 
-        public async Task<SpotifyCredentials> LogIn()
+            if (!credentials.UserIsValid)
+                await RefreshAccessToken(credentials.RefreshToken);
+            
+            return credentials;
+        }
+        
+        private async Task LogIn()
         {
             var verifier = new CodeVerifier();
             var state = Guid.NewGuid().ToString();
@@ -34,14 +48,12 @@ namespace SpotKick.Application.SpotifyAuth
 
             var code = await LocalServerCodeReceiver.ReceiveCodeAsync(url, redirectUrl, state);
 
-            var credentials = await GetAccessTokenFromCode(code, verifier.Verifier);
+            credentials = await GetAccessTokenFromCode(code, verifier.Verifier);
 
             credentials.ExpiresOn = DateTime.Now.AddSeconds(credentials.ExpiresIn);
-
-            return credentials;
         }
 
-        public async Task<SpotifyCredentials> RefreshAccessToken(string refreshToken)
+        private async Task RefreshAccessToken(string refreshToken)
         {
             var client = new HttpClient();
 
@@ -64,11 +76,9 @@ namespace SpotKick.Application.SpotifyAuth
             if (!response.IsSuccessStatusCode)
                 throw new SpotifyAuthException("Could not refresh spotify token: " + response.StatusCode);
 
-            var credentials = JsonConvert.DeserializeObject<SpotifyCredentials>(await response.Content.ReadAsStringAsync());
+            credentials = JsonConvert.DeserializeObject<SpotifyCredentials>(await response.Content.ReadAsStringAsync());
 
             credentials.ExpiresOn = DateTime.Now.AddSeconds(credentials.ExpiresIn);
-
-            return credentials;
         }
 
         private async Task<SpotifyCredentials> GetAccessTokenFromCode(string code, string verifier)
@@ -100,7 +110,6 @@ namespace SpotKick.Application.SpotifyAuth
             }
 
             return JsonConvert.DeserializeObject<SpotifyCredentials>(await response.Content.ReadAsStringAsync());
-
         }
     }
 }

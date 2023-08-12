@@ -63,7 +63,7 @@
 		<TextBox x:Name="SongKickUsername" TextWrapping="NoWrap" Text="{Binding SongKickUsername}"
 		         Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,30"/>
 		<Button x:Name="LoginRun" Content="{Binding ButtonText}"
-		        Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Click="LoginRun_Click" />
+		        Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Click="Run_Click" />
 		<TextBlock  Text="Export Plans" 
 		            Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,50,0,5" />
 		<TextBlock  Text="Folder Path" 

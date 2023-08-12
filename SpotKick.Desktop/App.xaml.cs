@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SpotKick.Application;
 using SpotKick.Application.Services;
 using SpotKick.Application.SpotifyAuth;
-using SpotKick.Desktop.UserRepository;
+using SpotKick.Application.UserRepository;
 
 namespace SpotKick.Desktop
 {
@@ -32,10 +32,11 @@ namespace SpotKick.Desktop
                 .AddJsonFile("appsettings.json");
 
             IConfiguration configuration = builder.Build();
-
+            
             services
                 .AddTransient<ISongkickService, SongkickService>()
-                .AddTransient<ISpotifyAuthService, SpotifyAuthService>()
+                .AddTransient<ISpotifyService, SpotifyService>()
+                .AddSingleton<ISpotifyAuthService, SpotifyAuthService>()
                 .AddTransient<IUserRepo, UserRepo>()
                 .AddLogging()
                 .AddMediatR(typeof(CreatePlaylist))

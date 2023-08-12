@@ -1,4 +1,4 @@
-﻿namespace SpotKick.Desktop.UserRepository
+﻿namespace SpotKick.Application.UserRepository
 {
     public interface IUserRepo
     {
