@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SpotKick.Application.Exceptions;
+using SpotKick.Application.UserRepository;
 
 namespace SpotKick.Application.SpotifyAuth
 {
@@ -19,10 +20,13 @@ namespace SpotKick.Application.SpotifyAuth
         private readonly string redirectUrl;
         private SpotifyCredentials credentials;
         
-        public SpotifyAuthService(IConfiguration configuration)
+        // This seems like it's juggling responsibilities between managing the local user and the spotify auth handshakes
+        // I probably need a user service that sits above this makes spotify auth and the user repo interact in a less messy way
+        public SpotifyAuthService(IConfiguration configuration, IUserRepo userRepo)
         {
             clientId = configuration["SpotifyClientId"];
-            redirectUrl = configuration["SpotifyRedirectUrl"]; 
+            redirectUrl = configuration["SpotifyRedirectUrl"];
+            credentials = userRepo.GetPreviousUser().SpotifyCredentials;
         }
         
         public async Task<SpotifyCredentials> GetCredentialsAsync()
@@ -39,6 +43,11 @@ namespace SpotKick.Application.SpotifyAuth
         public SpotifyCredentials GetCredentials()
         {
             return credentials;
+        }
+
+        public void ForgetCredentials()
+        {
+            credentials = null;
         }
 
         private async Task LogIn()

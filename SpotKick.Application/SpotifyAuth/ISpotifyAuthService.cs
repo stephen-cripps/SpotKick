@@ -6,5 +6,6 @@ namespace SpotKick.Application.SpotifyAuth
     {
         Task<SpotifyCredentials> GetCredentialsAsync();
         SpotifyCredentials GetCredentials();
+        void ForgetCredentials();
     }
 }

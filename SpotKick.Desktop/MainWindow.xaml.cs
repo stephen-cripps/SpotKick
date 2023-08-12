@@ -114,6 +114,7 @@ namespace SpotKick.Desktop
             user = new UserData();
             DataContext = context;
             userRepo.ForgetUser();
+            spotifyAuthService.ForgetCredentials();
             UpdateContext();
         }
         private void UpdateContext()
