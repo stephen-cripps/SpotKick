@@ -10,7 +10,7 @@ namespace SpotKick.Desktop.SpotifyAuth
 
         public string Challenge { get; set; }
 
-        const int ByteLength = 64;
+        private const int ByteLength = 64;
 
         public CodeVerifier()
         {
@@ -22,7 +22,7 @@ namespace SpotKick.Desktop.SpotifyAuth
         /// Hashes and Base64 encodes the verifier
         /// </summary>
         /// <returns></returns>
-        public string GenerateChallenge()
+        private string GenerateChallenge()
         {
             var hasher = SHA256.Create();
             var hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(Verifier));
@@ -31,10 +31,10 @@ namespace SpotKick.Desktop.SpotifyAuth
 
 
         /// <summary>
-        /// Generate a fixed length token that can be used in url without endcoding it
+        /// Generate a fixed length token that can be used in url without encoding it
         /// </summary>
         /// <returns></returns>
-        public static string GenerateToken()
+        private static string GenerateToken()
         {
             // get secure array bytes
             var secureArray = GenerateRandomBytes();
@@ -49,13 +49,14 @@ namespace SpotKick.Desktop.SpotifyAuth
         /// Generate a cryptographically secure array of bytes with a fixed length
         /// </summary>
         /// <returns></returns>
-        static byte[] GenerateRandomBytes()
+        private static byte[] GenerateRandomBytes()
         {
-            using var provider = new RNGCryptoServiceProvider();
+            using var rng = RandomNumberGenerator.Create();
             var byteArray = new byte[ByteLength];
-            provider.GetBytes(byteArray);
+            rng.GetBytes(byteArray);
 
             return byteArray;
         }
+
     }
 }

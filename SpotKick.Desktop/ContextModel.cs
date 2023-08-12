@@ -5,9 +5,9 @@ namespace SpotKick.Desktop
 {
     public class ContextModel : ObservableObject
     {
-        bool showGreeting;
-        string buttonText;
-        string spotifyUsername;
+        private bool showGreeting;
+        private string buttonText;
+        private string spotifyUsername;
 
         public bool ShowGreeting
         {

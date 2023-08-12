@@ -31,11 +31,11 @@ namespace SpotKick.Application
 
         public class Handler : IRequestHandler<Command>
         {
-            readonly ISongkickService songkickService;
-            ISpotifyService spotifyService;
-            Dictionary<string, IEnumerable<string>> topTrackCache = new Dictionary<string, IEnumerable<string>>();
-            List<Gig> upcomingGigs;
-            List<Gig> attendingGigs;
+            private readonly ISongkickService songkickService;
+            private ISpotifyService spotifyService;
+            private readonly Dictionary<string, IEnumerable<string>> topTrackCache = new();
+            private List<Gig> upcomingGigs;
+            private List<Gig> attendingGigs;
 
             public Handler(ISongkickService songkickService)
             {
@@ -48,13 +48,7 @@ namespace SpotKick.Application
                 attendingGigs = await songkickService.FindGigs(request.SongKickUsername, Services.Reason.attendance);
 
                 spotifyService = new SpotifyService(request.SpotifyAccessToken);
-
-                await CreatePlaylist(upcomingGigs
-                    .Where(gig => gig.Date < DateTimeOffset.Now.AddDays(30))
-                    .Where(gig => gig.Status == Status.Ok)
-                    .SelectMany(gig => gig.Artists)
-                    .ToHashSet(), "SpotKick - Next 30 days.");
-
+                
                 await CreatePlaylist(attendingGigs
                     .Where(gig => gig.Status != Status.Cancelled)
                     .SelectMany(gig => gig.Artists)
@@ -70,7 +64,7 @@ namespace SpotKick.Application
             }
 
 
-            async Task CreatePlaylist(IEnumerable<Artist> artists, string playlistName)
+            private async Task CreatePlaylist(IEnumerable<Artist> artists, string playlistName)
             {
                 var tracks = new List<string>();
                 foreach (var artist in artists)
@@ -90,7 +84,7 @@ namespace SpotKick.Application
                 }
             }
 
-            async Task<IEnumerable<string>> GetArtistTracks(Artist artist)
+            private async Task<IEnumerable<string>> GetArtistTracks(Artist artist)
             {
                 var tracks = new List<string>();
                 try

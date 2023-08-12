@@ -32,9 +32,7 @@ namespace SpotKick.Application
 
         public class Handler : IRequestHandler<Command>
         {
-            readonly ISongkickService songkickService;
-            readonly Dictionary<string, IEnumerable<string>> trackedArtists = new Dictionary<string, IEnumerable<string>>();
-            ISpotifyService spotifyService;
+            private readonly ISongkickService songkickService;
 
             public Handler(ISongkickService songkickService)
             {
@@ -60,7 +58,7 @@ namespace SpotKick.Application
                 return Unit.Value;
             }
 
-            public string GenerateCSV(IEnumerable<Gig> gigs)
+            private string GenerateCSV(IEnumerable<Gig> gigs)
             {
                 var output = "";
                 const char delimiter = ',';
@@ -87,7 +85,7 @@ namespace SpotKick.Application
                 return output;
             }
 
-            public string GetCellValue(System.Reflection.PropertyInfo property, Gig gig)
+            private string GetCellValue(System.Reflection.PropertyInfo property, Gig gig)
             {
                 var propertyValue = property.GetValue(gig, null);
                 var cellValue = property.Name switch

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 using System.Windows;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotKick.Application;
 using SpotKick.Application.Services;
@@ -15,7 +17,7 @@ namespace SpotKick.Desktop
     /// </summary>
     public partial class App : System.Windows.Application
     {
-        ServiceProvider serviceProvider;
+        private readonly ServiceProvider serviceProvider;
         public App()
         {
             var services = new ServiceCollection();
@@ -23,19 +25,25 @@ namespace SpotKick.Desktop
             serviceProvider = services.BuildServiceProvider();
         }
 
-        void ConfigureServices(ServiceCollection services)
+        private void ConfigureServices(ServiceCollection services)
         {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+
+            IConfiguration configuration = builder.Build();
 
             services
-                .AddTransient<ISongkickService, SongkickService>(x => new SongkickService(ConfigurationManager.AppSettings["SongkickApiKey"]))
+                .AddTransient<ISongkickService, SongkickService>()
                 .AddTransient<ISpotifyAuthService, SpotifyAuthService>()
                 .AddTransient<IUserRepo, UserRepo>()
                 .AddLogging()
                 .AddMediatR(typeof(CreatePlaylist))
-                .AddSingleton<MainWindow>();
+                .AddSingleton<MainWindow>()
+                .AddSingleton(configuration);
         }
 
-        void OnStartup(object sender, StartupEventArgs e)
+        private void OnStartup(object sender, StartupEventArgs e)
         {
             try
             {

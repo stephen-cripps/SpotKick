@@ -17,11 +17,11 @@ namespace SpotKick.Desktop
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly ISpotifyAuthService spotifyAuthService;
-        readonly IUserRepo userRepo;
-        readonly IMediator mediator;
-        UserData user = new UserData();
-        ContextModel context = new ContextModel();
+        private readonly ISpotifyAuthService spotifyAuthService;
+        private readonly IUserRepo userRepo;
+        private readonly IMediator mediator;
+        private UserData user = new UserData();
+        private ContextModel context = new ContextModel();
 
 
         public MainWindow(ISpotifyAuthService spotifyAuthService, IUserRepo userRepo, IMediator mediator)
@@ -44,7 +44,7 @@ namespace SpotKick.Desktop
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             await InitialiseUser();
             UpdateContext();
@@ -55,7 +55,7 @@ namespace SpotKick.Desktop
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        async void CheckUserToken(object sender, System.EventArgs e)
+        private async void CheckUserToken(object sender, System.EventArgs e)
         {
             if (!user.SpotifyCredentials.UserIsValid)
                 await SpotifyRefresh();
@@ -65,7 +65,7 @@ namespace SpotKick.Desktop
         /// Checks stored user data. Performs token refresh if required.
         /// </summary>
         /// <returns></returns>
-        async Task InitialiseUser()
+        private async Task InitialiseUser()
         {
             var previousUser = userRepo.GetPreviousUser();
 
@@ -83,7 +83,7 @@ namespace SpotKick.Desktop
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        async void LoginRun_Click(object sender, RoutedEventArgs e)
+        private async void LoginRun_Click(object sender, RoutedEventArgs e)
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "";
@@ -113,7 +113,7 @@ namespace SpotKick.Desktop
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void ForgetMe_OnClick(object sender, RoutedEventArgs e)
+        private void ForgetMe_OnClick(object sender, RoutedEventArgs e)
         {
             context = new ContextModel();
             user = new UserData();
@@ -126,7 +126,7 @@ namespace SpotKick.Desktop
         /// Runs the CreatePlaylist command 
         /// </summary>
         /// <returns></returns>
-        async Task Run()
+        private async Task Run()
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "Running...";
@@ -145,7 +145,7 @@ namespace SpotKick.Desktop
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        async void ExportRun_Click(object sender, RoutedEventArgs e)
+        private async void ExportRun_Click(object sender, RoutedEventArgs e)
         {
             ApplicationStatus.Foreground = Brushes.Black;
             ApplicationStatus.Text = "Running...";
@@ -170,7 +170,7 @@ namespace SpotKick.Desktop
         /// Launches the browser for a user to auth, returns Access and Refresh Tokens
         /// </summary>
         /// <returns></returns>
-        async Task SpotifyLogin()
+        private async Task SpotifyLogin()
         {
             if (await SpotifyRefresh())
                 return;
@@ -190,7 +190,7 @@ namespace SpotKick.Desktop
         /// Retrieves new access token from login token. Returns true if successful, false if not.
         /// </summary>
         /// <returns></returns>
-        async Task<bool> SpotifyRefresh()
+        private async Task<bool> SpotifyRefresh()
         {
             try
             {
@@ -221,7 +221,7 @@ namespace SpotKick.Desktop
         /// <summary>
         /// Calls the spotify API to find a user's username
         /// </summary>
-        async Task GetUsername()
+        private async Task GetUsername()
         {
             var query = new ReadSpotifyUsername.Query(user.SpotifyCredentials.AccessToken);
             user.SpotifyUsername = await mediator.Send(query);
@@ -233,7 +233,7 @@ namespace SpotKick.Desktop
         /// Converts exception type into error message
         /// </summary>
         /// <param name="ex"></param>
-        void SetExceptionMessage(Exception ex)
+        private void SetExceptionMessage(Exception ex)
         {
             ApplicationStatus.Foreground = Brushes.Red;
             ApplicationStatus.Text = ex switch
@@ -248,7 +248,7 @@ namespace SpotKick.Desktop
         /// <summary>
         /// Refresh bound values in the UI
         /// </summary>
-        void UpdateContext()
+        private void UpdateContext()
         {
             context.SongKickUsername ??= user.SongKickUsername;
 

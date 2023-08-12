@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SpotKick.Application.Exceptions;
 using SpotKick.Application.Models;
@@ -12,11 +13,11 @@ namespace SpotKick.Application.Services
 {
     public class SongkickService : ISongkickService
     {
-        readonly string apiKey;
+        private readonly string apiKey;
 
-        public SongkickService(string apiKey)
+        public SongkickService(IConfiguration configuration)
         {
-            this.apiKey = apiKey;
+            apiKey = configuration["SongkickApiKey"];
         }
 
         public async Task<List<Gig>> FindGigs(string username, Reason reason)

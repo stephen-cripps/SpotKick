@@ -5,8 +5,8 @@ namespace SpotKick.Desktop.UserRepository
 {
     public class UserRepo : IUserRepo
     {
-        readonly XmlSerializer serialiser;
-        const string path = "./UserData.xml";
+        private readonly XmlSerializer serialiser;
+        private const string path = "./UserData.xml";
 
         public UserRepo()
         {
@@ -15,10 +15,8 @@ namespace SpotKick.Desktop.UserRepository
 
         public void StoreCurrentUser(UserData data)
         {
-            var file = File.Create(path);
-
-            serialiser.Serialize(file, data);
-            file.Close();
+            using var fileStream = new FileStream(path, FileMode.Create);
+            serialiser.Serialize(fileStream, data);
         }
 
         public UserData GetPreviousUser()

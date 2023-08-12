@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SpotKick.Application.Exceptions;
+using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 namespace SpotKick.Desktop.SpotifyAuth
 {
@@ -15,13 +16,13 @@ namespace SpotKick.Desktop.SpotifyAuth
     /// </summary>
     public class SpotifyAuthService : ISpotifyAuthService
     {
-        readonly string clientId;
-        readonly string redirectUrl;
+        private readonly string clientId;
+        private readonly string redirectUrl;
 
-        public SpotifyAuthService()
+        public SpotifyAuthService(IConfiguration configuration)
         {
-            clientId = ConfigurationManager.AppSettings["SpotifyClientId"];
-            redirectUrl = ConfigurationManager.AppSettings["SpotifyRedirectUrl"];
+            clientId = configuration["SpotifyClientId"];
+            redirectUrl = configuration["SpotifyRedirectUrl"];
         }
 
         public async Task<SpotifyCredentials> LogIn()
@@ -71,7 +72,7 @@ namespace SpotKick.Desktop.SpotifyAuth
             return credentials;
         }
 
-        async Task<SpotifyCredentials> GetAccessTokenFromCode(string code, string verifier)
+        private async Task<SpotifyCredentials> GetAccessTokenFromCode(string code, string verifier)
         {
             var client = new HttpClient();
 

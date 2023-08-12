@@ -6,7 +6,7 @@ namespace SpotKick.Application.Models
 {
     public class Gig
     {
-        readonly Status status;
+        private readonly Status status;
 
         public Gig(IEnumerable<Artist> trackedArtists, DateTimeOffset date, string location, string status, string attendance, string displayName)
         {
