@@ -350,7 +350,7 @@ MigrationBackup/
 .ionide/
 
 */local.settings.json
-SpotKick.Desktop/AppSettings.json
-SpotKick.Desktop/App.config
+*/AppSettings.json
+*/App.config
 
 .idea/
