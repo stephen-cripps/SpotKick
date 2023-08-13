@@ -15,7 +15,7 @@ namespace SpotKick.Application.SpotifyAuth
         public int ExpiresIn { get; set; }
         public DateTime ExpiresOn { get; set; }
 
-        public bool UserIsValid => AccessToken != null && DateTime.Now.AddMinutes(59) < ExpiresOn;
+        public bool ShouldRefresh => AccessToken != null && DateTime.Now.AddMinutes(59) < ExpiresOn;
     }
 }
     

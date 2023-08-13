@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using SpotKick.Application.Exceptions;
 using SpotKick.Application.SpotifyAuth;
 using SpotKick.Application.UserRepository;
 
@@ -20,21 +21,10 @@ public class CurrentUserService : ICurrentUserService
     public async Task<UserData> ValidateAndGetCurrentUserAsync(bool getUsername = true)
     {
         if (currentUser.SpotifyCredentials.AccessToken == null)
-        {
-            currentUser.SpotifyCredentials = await spotifyAuthService.LogIn();
-            if (getUsername)
-                currentUser.SpotifyUser =
-                    await spotifyAuthService.GetCurrentUser(currentUser.SpotifyCredentials.AccessToken);
-            
-            userRepo.StoreCurrentUser(currentUser);
-        }
+            await Login(getUsername);
 
-        if (!currentUser.SpotifyCredentials.UserIsValid)
-        {
-            await spotifyAuthService.RefreshAccessToken(currentUser.SpotifyCredentials.RefreshToken);
-            userRepo.StoreCurrentUser(currentUser);
-        }
-
+        if (!currentUser.SpotifyCredentials.ShouldRefresh)
+            await Refresh();
 
         return currentUser;
     }
@@ -54,5 +44,30 @@ public class CurrentUserService : ICurrentUserService
     {
         currentUser = null;
         userRepo.ForgetUser();
+    }
+
+    private async Task Login(bool getUsername)
+    {
+        currentUser.SpotifyCredentials = await spotifyAuthService.LogIn();
+        if (getUsername)
+            currentUser.SpotifyUser =
+                await spotifyAuthService.GetCurrentUser(currentUser.SpotifyCredentials.AccessToken);
+
+        userRepo.StoreCurrentUser(currentUser);
+    }
+
+    private async Task Refresh()
+    {
+        try
+        {
+            currentUser.SpotifyCredentials.RefreshToken =
+                (await spotifyAuthService.RefreshAccessToken(currentUser.SpotifyCredentials.RefreshToken)).RefreshToken;
+        }
+        catch (SpotifyAuthException e)
+        {
+            await Login(false);
+        }
+
+        userRepo.StoreCurrentUser(currentUser);
     }
 }

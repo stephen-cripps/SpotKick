@@ -46,10 +46,10 @@ namespace SpotKick.Application
 
                 await spotifyService.AuthService();
                 
-                // await CreatePlaylist(attendingGigs
-                //     .Where(gig => gig.Status != Status.Cancelled)
-                //     .SelectMany(gig => gig.Artists)
-                //     .ToHashSet(), "SpotKick - Interested & Going.");
+                await CreatePlaylist(attendingGigs
+                    .Where(gig => gig.Status != Status.Cancelled)
+                    .SelectMany(gig => gig.Artists)
+                    .ToHashSet(), "SpotKick - Interested & Going.");
 
                 await CreatePlaylist(attendingGigs
                     .Where(gig => gig.Attendance == Attendance.Going)
@@ -57,10 +57,10 @@ namespace SpotKick.Application
                     .SelectMany(gig => gig.Artists)
                     .ToHashSet(), "SpotKick - Just Going.");
                 
-                // await CreatePlaylist(mancGigs
-                //     .Where(gig => gig.Status != Status.Cancelled)
-                //     .SelectMany(gig => gig.Artists)
-                //     .ToHashSet(), "SpotKick - Manchester, Next 7 Days.");
+                await CreatePlaylist(mancGigs
+                    .Where(gig => gig.Status != Status.Cancelled)
+                    .SelectMany(gig => gig.Artists)
+                    .ToHashSet(), "SpotKick - Manchester, Next 7 Days.");
                 
 
                 return Unit.Value;
