@@ -5,7 +5,7 @@ namespace SpotKick.Application.Services;
 
 public interface ICurrentUserService
 {
-    Task<UserData> ValidateAndGetCurrentUserAsync();
+    Task<UserData> ValidateAndGetCurrentUserAsync(bool getUsername = true);
     
     UserData GetCurrentUser();
 

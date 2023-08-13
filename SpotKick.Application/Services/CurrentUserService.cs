@@ -17,13 +17,15 @@ public class CurrentUserService : ICurrentUserService
         currentUser = userRepo.GetPreviousUser() ?? new UserData();
     }
 
-    public async Task<UserData> ValidateAndGetCurrentUserAsync()
+    public async Task<UserData> ValidateAndGetCurrentUserAsync(bool getUsername = true)
     {
         if (currentUser.SpotifyCredentials.AccessToken == null)
         {
             currentUser.SpotifyCredentials = await spotifyAuthService.LogIn();
-            currentUser.SpotifyUser =
-                await spotifyAuthService.GetCurrentUser(currentUser.SpotifyCredentials.AccessToken);
+            if (getUsername)
+                currentUser.SpotifyUser =
+                    await spotifyAuthService.GetCurrentUser(currentUser.SpotifyCredentials.AccessToken);
+            
             userRepo.StoreCurrentUser(currentUser);
         }
 

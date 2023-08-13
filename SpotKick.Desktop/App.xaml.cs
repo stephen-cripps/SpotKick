@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.IO;
 using System.Windows;
 using MediatR;
@@ -32,6 +31,10 @@ namespace SpotKick.Desktop
                 .AddJsonFile("appsettings.json");
 
             IConfiguration configuration = builder.Build();
+            
+            services.RegisterServices();
+
+            services.AddSingleton<MainWindow>();
             
             services
                 .AddTransient<ISongkickService, SongkickService>()
