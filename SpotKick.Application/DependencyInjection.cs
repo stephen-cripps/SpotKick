@@ -10,7 +10,7 @@ namespace SpotKick.Application;
 
 public static class DependencyInjection
 {
-    public static void RegisterServices(this ServiceCollection services)
+    public static void RegisterServices(this IServiceCollection services)
     {
         var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
