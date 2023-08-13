@@ -43,6 +43,8 @@ namespace SpotKick.Application
             {
                 var attendingGigs = await songkickService.FindUserGigs(request.SongKickUsername);
                 var mancGigs = await songkickService.FindLocalGigs();
+
+                await spotifyService.AuthService();
                 
                 // await CreatePlaylist(attendingGigs
                 //     .Where(gig => gig.Status != Status.Cancelled)

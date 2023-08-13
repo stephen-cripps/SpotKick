@@ -1,4 +1,5 @@
-﻿using SpotKick.Application.SpotifyAuth;
+﻿using SpotKick.Application.ResponseModels.SpotifyResults;
+using SpotKick.Application.SpotifyAuth;
 
 namespace SpotKick.Application.UserRepository
 {
@@ -13,6 +14,6 @@ namespace SpotKick.Application.UserRepository
 
         public string SongKickUsername { get; set; }
 
-        public string SpotifyUsername { get; set; }
+        public SpotifyUser SpotifyUser { get; set; }
     }
 }

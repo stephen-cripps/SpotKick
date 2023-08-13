@@ -2,7 +2,7 @@
 
 namespace SpotKick.Application.ResponseModels.SpotifyResults
 {
-    public class CurrentUser
+    public class SpotifyUser
     {
         public long Id { get; set; }
 

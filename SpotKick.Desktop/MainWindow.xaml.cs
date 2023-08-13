@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Threading;
 using MediatR;
 using SpotKick.Application;
 using SpotKick.Application.Exceptions;
 using SpotKick.Application.Services;
-using SpotKick.Application.SpotifyAuth;
 using SpotKick.Application.UserRepository;
 
 
@@ -18,28 +15,26 @@ namespace SpotKick.Desktop
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly ISpotifyAuthService spotifyAuthService;
-        private readonly IUserRepo userRepo;
+
         private readonly IMediator mediator;
         private readonly ISpotifyService spotifyService;
-        private UserData user = new UserData();
-        private ContextModel context = new ContextModel();
+        private readonly ICurrentUserService currentUserService;
+        private UserData user;
+        private ContextModel context = new ();
 
 
-        public MainWindow(ISpotifyAuthService spotifyAuthService, IUserRepo userRepo, IMediator mediator,
-            ISpotifyService spotifyService)
+        public MainWindow(IMediator mediator, ISpotifyService spotifyService, ICurrentUserService currentUserService)
         {
-            this.spotifyAuthService = spotifyAuthService;
-            this.userRepo = userRepo;
             this.mediator = mediator;
             this.spotifyService = spotifyService;
+            this.currentUserService = currentUserService;
             InitializeComponent();
             DataContext = context;
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            user = userRepo.GetPreviousUser();
+            user = currentUserService.GetCurrentUser();
             UpdateContext();
         }
 
@@ -47,20 +42,19 @@ namespace SpotKick.Desktop
         {
             ApplicationStatus.Foreground = Brushes.Black;
             user.SongKickUsername = context.SongKickUsername;
-            userRepo.StoreCurrentUser(user);
             try
             {
                 if (user.SpotifyCredentials.AccessToken == null)
                 {
                     ApplicationStatus.Text = "logging In...";
-                    user.SpotifyCredentials = await spotifyAuthService.GetCredentialsAsync();
-                    user.SpotifyUsername = await spotifyService.GetUsername();
+                    user = await currentUserService.ValidateAndGetCurrentUserAsync();
                     UpdateContext();
                     ApplicationStatus.Text = "";
                 }
                 else
                 {
                     ApplicationStatus.Text = "Updating Playlists...";
+                    currentUserService.StoreSongkickUsername(context.SongKickUsername);
                     var command = new CreatePlaylist.Command(context.SongKickUsername);
                     await mediator.Send(command);
                     ApplicationStatus.Text = "";
@@ -83,8 +77,7 @@ namespace SpotKick.Desktop
 
             try
             {
-                user.SongKickUsername = context.SongKickUsername;
-                userRepo.StoreCurrentUser(user);
+                currentUserService.StoreSongkickUsername(context.SongKickUsername);
                 var command = new CreateCSVExport.Command(context.FolderPath + "/" + context.FileName,
                     context.SongKickUsername);
                 await mediator.Send(command);
@@ -113,17 +106,16 @@ namespace SpotKick.Desktop
             context = new ContextModel();
             user = new UserData();
             DataContext = context;
-            userRepo.ForgetUser();
-            spotifyAuthService.ForgetCredentials();
+            currentUserService.ForgetCurrentUser();
             UpdateContext();
         }
         private void UpdateContext()
         {
-            context.SongKickUsername ??= user.SongKickUsername;
+            context.ButtonText = user.SpotifyCredentials.AccessToken != null ? "Update Playlists" : "Spotify Login";
+            context.ShowGreeting = user.SpotifyCredentials.AccessToken != null;
 
-            context.ButtonText = user.SpotifyUsername != null ? "Update Playlists" : "Spotify Login";
-            context.ShowGreeting = user.SpotifyUsername != null;
-            context.SpotifyUsername = user.SpotifyUsername;
+            context.SongKickUsername ??= user.SongKickUsername;
+            context.SpotifyUsername = user.SpotifyUser?.Username;
         }
     }
 }

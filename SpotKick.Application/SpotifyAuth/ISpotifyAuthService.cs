@@ -1,11 +1,13 @@
 ﻿using System.Threading.Tasks;
+using SpotKick.Application.ResponseModels.SpotifyResults;
 
-namespace SpotKick.Application.SpotifyAuth
+namespace SpotKick.Application.SpotifyAuth;
+
+public interface ISpotifyAuthService
 {
-    public interface ISpotifyAuthService
-    {
-        Task<SpotifyCredentials> GetCredentialsAsync();
-        SpotifyCredentials GetCredentials();
-        void ForgetCredentials();
-    }
+    Task<SpotifyCredentials> LogIn();
+
+    Task<SpotifyCredentials> RefreshAccessToken(string refreshToken);
+
+    Task<SpotifyUser> GetCurrentUser(string token);
 }

@@ -36,8 +36,9 @@ namespace SpotKick.Desktop
             services
                 .AddTransient<ISongkickService, SongkickService>()
                 .AddTransient<ISpotifyService, SpotifyService>()
-                .AddSingleton<ISpotifyAuthService, SpotifyAuthService>()
+                .AddTransient<ISpotifyAuthService, SpotifyAuthService>()
                 .AddTransient<IUserRepo, UserRepo>()
+                .AddSingleton<ICurrentUserService, CurrentUserService>()
                 .AddLogging()
                 .AddMediatR(typeof(CreatePlaylist))
                 .AddSingleton<MainWindow>()
