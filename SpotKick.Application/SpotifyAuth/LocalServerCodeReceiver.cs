@@ -41,7 +41,7 @@ namespace SpotKick.Application.SpotifyAuth
             {
                 listener.Start();
 
-                var process = new Process { StartInfo = { UseShellExecute = true, FileName = authorisationUrl } };
+                var process = new Process {StartInfo = {UseShellExecute = true, FileName = authorisationUrl}};
                 process.Start();
 
                 // Wait to get the authorization code response.
@@ -54,7 +54,6 @@ namespace SpotKick.Application.SpotifyAuth
                     writer.WriteLine(ClosePageResponse);
                     writer.Flush();
                 }
-                context.Response.OutputStream.Close();
 
                 if (coll["state"] != state)
                     throw new SpotifyAuthException("The returned state was invalid");

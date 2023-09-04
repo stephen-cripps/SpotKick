@@ -36,7 +36,7 @@ namespace SpotKick.Application.Services
         {
             var uri = new Uri($"https://api.spotify.com/v1/search?q={name}&type=artist");
             logger.LogInformation("Finding artist Id for {Name}", name);
-
+ 
             while (true)
             {
                 var response = await spotifyClient.GetAsync(uri);
